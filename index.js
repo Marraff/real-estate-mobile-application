@@ -45,6 +45,29 @@ app.get('/check', async(req,res) => {
 
 app.post('/register', async(req,res) => {
     
+    const name = req.body.name;
+    const surname = req.body.surname;
+    const email = req.body.email;
+    const telephone = req.body.cislo;
+    const profile_picture = req.body.profile_picture;
+    
+    db.query(
+        "INSERT INTO users (name, surname, email, telephone, profile_picture_ref) VALUES (?,?,?,?,?)",
+         [name, surname, email, telephone, profile_picture], 
+         (err,result) => {
+            if (err){
+                res.writeHead(400, { 'Content-Type': 'application/json' }); 
+                res.send("Registration wasn't successfull");
+                console.log(err)
+            }
+            else{
+                res.writeHead(200, { 'Content-Type': 'application/json' }); 
+                res.send("User was created");
+            }
+         }
+    );
+
+
 });
 
 app.post('/newOffer', async(req,res) => {
@@ -59,7 +82,7 @@ app.get('/change', async(req,res) => {
     
 });
 
-app.delete('/zmaz', async(req,res) => {
+app.delete('/zmaz', async(req,res) => {     // zmazanie danej nehnuteľnosti
 
     const property_id = req.body.property_id;
     const user_id = req.body.user_id;
@@ -70,7 +93,8 @@ app.delete('/zmaz', async(req,res) => {
          (err,result) => {
             if (err){
                 res.writeHead(400, { 'Content-Type': 'application/json' }); 
-                res.send("PInvalid ID of the property");
+                res.send("Invalid ID of the property");
+                console.log(err)
             }
             else{
                 res.writeHead(200, { 'Content-Type': 'application/json' }); 
