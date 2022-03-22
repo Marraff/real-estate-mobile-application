@@ -1,0 +1,150 @@
+openapi: 3.0.0
+info:
+  title: MTAA zadanie 2 
+  description: Definícia API pre zadanie 2
+  version: 0.1.0
+tags:
+- name: "Zadanie 2"
+paths:
+  /offers:
+    get:
+      tags:
+        - "Zadanie 2"
+      summary: Vráti informácie o ponukách nehnuteľností.
+      description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM posts`
+      responses:
+        '200':
+          description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
+          content:
+            application/json:
+              schema: 
+                type: object    
+                properties:          
+                  name:
+                    type: string
+                  surname:
+                    type: string
+                  like_status: 
+                    type: integer
+                  added_date:
+                    type: string
+                  title: 
+                    type: string
+                  image_link:
+                    type: string
+                example: 
+                  name: 'Jozko'
+                  surname: 'Mrkvicka'
+                  like_status: 56
+                  added_date: '2022-03-22'
+                  title: '2-izbový byt na prenájom v kľudnej časti mesta'
+                                    
+  /register:
+    post:
+      tags:
+        - "Zadanie 2"
+      summary: umožní pridanie používateľa do databázy.
+      description: Pre získanie tejto informácie sa použije príkaz `INSERT INTO users (name, surname, email, telephone) VALUES (?,?,?,?)`
+      responses:
+        '200':
+          description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
+          content:
+            application/json:
+              schema:      
+                type: object
+                properties:          
+                  name:
+                    type: string
+                  surname:
+                    type: string
+                  email:
+                    type: string
+                  telephone:
+                    type: string
+                example: 
+                  name: 'Jozko'
+                  surname: 'Mrkvicka'
+                  email: 'jozko.mrkva@stuba.sk'
+                  telephone: '0940111111'
+  /domy:
+      get:
+        tags:
+          - "Zadanie 2"
+        summary: Vráti dostupnú ponuku domov.
+        description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM property WHERE type = 'dom' `
+        responses:
+          '200':
+            description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
+            content:
+              application/json:
+                schema: 
+                  type: object           
+                  properties:          
+                    name:
+                      type: string
+                    surname:
+                      type: string
+                    like_status: 
+                      type: integer
+                    added_date:
+                      type: string
+                    title: 
+                      type: string
+                    image_link:
+                      type: string
+                    type:
+                      type: string
+                  example: 
+                    name: 'Jozko'
+                    surname: 'Mrkvicka'
+                    like_status: 56
+                    added_date: '2022-03-22'
+                    title: '2-dom byt na predaj v kľudnej časti mesta'
+                    type: 'dom'
+  /byty:
+      get:
+        tags:
+          - "Zadanie 2"
+        summary: Vráti dostupnú ponuku bytov.
+        description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM posts WHERE type = 'byt' `
+        responses:
+          '200':
+            description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
+            content:
+              application/json:
+                schema: 
+                  type: object   
+                  properties:          
+                    name:
+                      type: string
+                    surname:
+                      type: string
+                    like_status: 
+                      type: integer
+                    added_date:
+                      type: string
+                    title: 
+                      type: string
+                    image_link:
+                      type: string
+                    type:
+                      type: string
+                  example: 
+                    name: 'Jozko'
+                    surname: 'Mrkvicka'
+                    like_status: 56
+                    added_date: '2022-03-22'
+                    title: '2-izbový byt na prenájom v kľudnej časti mesta'
+                    type: 'byt' 
+  /zmaz:
+    delete:
+      tags:
+        - "Zadanie 2"
+      summary: Zmaže zadaný inzerát.
+      description: Pre zmazanie daného inzerátu sa použije príkaz `DELETE FROM posts WHERE id =  `
+      responses:
+          '200':
+            description: Property was deleted.
+          '400':
+            description: Invalid ID of the property.
+  
