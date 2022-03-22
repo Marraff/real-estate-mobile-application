@@ -60,7 +60,25 @@ app.get('/change', async(req,res) => {
 });
 
 app.delete('/zmaz', async(req,res) => {
-    
+
+    const property_id = req.body.property_id;
+    const user_id = req.body.user_id;
+
+    db.query(
+        "DELETE FROM property WHERE id = ? AND users_id = ?",
+        [property_id,user_id],
+         (err,result) => {
+            if (err){
+                res.writeHead(400, { 'Content-Type': 'application/json' }); 
+                res.send("PInvalid ID of the property");
+            }
+            else{
+                res.writeHead(200, { 'Content-Type': 'application/json' }); 
+                res.send("Property was deleted");
+            }
+         }
+    );
+
 });
 
 app.listen(8080, ()=>{                          //spustenie servera               
