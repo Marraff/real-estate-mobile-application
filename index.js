@@ -1,8 +1,12 @@
 const express = require('express');
 const app = express();
 const db = require('./connect.js');
+const cors = require('cors')
+var http = require('http');
+const { getMaxListeners } = require('process');
 
-app.use(express.json());
+app.use(cors());
+app.use(express.json())
 
 
 app.get('/', async(req,res) => {
@@ -85,10 +89,11 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
     const surname = "Rychly"
     const email = "peter.rychly@gmail.com"
     const telephone = "0945222333"
+    const profile_picture = null
 
     db.query(
-        "INSERT INTO users (name, surname, email, telephone) VALUES (?,?,?,?)",
-         [name, surname, email, telephone], 
+        "INSERT INTO users (name, surname, email, telephone, profile_picture) VALUES (?,?,?,?,?)",
+         [name, surname, email, telephone,profile_picture], 
          (err,result) => {
             if (err){
                 //res.writeHead(400, { 'Content-Type': 'application/json' }); 
@@ -107,11 +112,11 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 
 app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikacie
 
-    const email = req.body.email;
-    const name = req.body.name;
+    const email = "mraffac@gmail.com"//req.body.email;
+    const name = "Martin"//req.body.name;
 
-    db.query("SELECT * FROM users WHERE email = ? AND name = ?",
-    [email,name],
+    db.query("SELECT * FROM users WHERE email = ?",
+    [email],
     (err,result) => {
         if (err){
             //res.writeHead(200, { 'Content-Type': 'application/json' }); 
@@ -174,6 +179,25 @@ app.delete('/zmaz', async(req,res) => {     // zmazanie danej nehnuteľnosti
     );
 
 });
+///////////
+
+app.put('/find',(req,res) =>{
+    const email = "mraffac@gmail.com";
+    console.log(email)
+    db.query("SELECT * FROM customers WHERE email = ?",
+    [email],
+    (err,result) => {
+        if (err){
+            console.log(err);
+        }
+        else{
+            res.send(result);
+            console.log(result);
+        }
+        }
+    )
+});
+
 
 app.listen(8080, ()=>{                          //spustenie servera               
     console.log('Server running at port 8080');

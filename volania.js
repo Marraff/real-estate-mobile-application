@@ -1,5 +1,5 @@
 import Axios from "axios"
-
+/*
 const addCustomer = () => {             //poslanie udajov o registrovanom zakaznikovy na server aby sa zapisali do databazi
     Axios.post('http://localhost:8080/register', {
       name: "Peter", 
@@ -23,3 +23,4 @@ const addCustomer = () => {             //poslanie udajov o registrovanom zakazn
   
   addCustomer();
   getCustomers();
+  */
