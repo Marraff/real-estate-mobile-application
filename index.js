@@ -48,7 +48,7 @@ app.get('/offers', async(req,res) => {      //zobrazenie vsetkych ponuk nehnutel
             }
             else{
                 //res.writeHead(200, { 'Content-Type': 'application/json' }); 
-                res.send(result);
+                res.send(result,2,null);
             }
          }
     );
@@ -60,11 +60,11 @@ app.get('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouziv
 
     db.query("SELECT * FROM property INNER JOIN location ON property.location_id = location.id INNER JOIN posts ON posts.users_id = property.users_id ", (err,result) => {
         if (err){
-            res.writeHead(400, { 'Content-Type': 'application/json' }); 
+            //res.writeHead(400, { 'Content-Type': 'application/json' }); 
             console.log(err)
         }
         else{
-            res.writeHead(200, { 'Content-Type': 'application/json' }); 
+            //res.writeHead(200, { 'Content-Type': 'application/json' }); 
             res.send(result);
         }
      }
@@ -73,24 +73,30 @@ app.get('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouziv
 });
 
 app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
-    
+    /*
     const name = req.body.name;
     const surname = req.body.surname;
     const email = req.body.email;
     const telephone = req.body.cislo;
     const profile_picture = req.body.profile_picture;
-    
+    */
+
+    const name = "Peter" 
+    const surname = "Rychly"
+    const email = "peter.rychly@gmail.com"
+    const telephone = "0945222333"
+
     db.query(
-        "INSERT INTO users (name, surname, email, telephone, profile_picture_ref) VALUES (?,?,?,?,?)",
-         [name, surname, email, telephone, profile_picture], 
+        "INSERT INTO users (name, surname, email, telephone) VALUES (?,?,?,?)",
+         [name, surname, email, telephone], 
          (err,result) => {
             if (err){
-                res.writeHead(400, { 'Content-Type': 'application/json' }); 
+                //res.writeHead(400, { 'Content-Type': 'application/json' }); 
                 res.send("Registration wasn't successfull");
                 console.log(err)
             }
             else{
-                res.writeHead(200, { 'Content-Type': 'application/json' }); 
+                //res.writeHead(200, { 'Content-Type': 'application/json' }); 
                 res.send("User was created");
             }
          }
@@ -108,12 +114,12 @@ app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikac
     [email,name],
     (err,result) => {
         if (err){
-            res.writeHead(200, { 'Content-Type': 'application/json' }); 
+            //res.writeHead(200, { 'Content-Type': 'application/json' }); 
             res.send("Invalid name or email");
             console.log(err);
         }
         else{
-            res.writeHead(200, { 'Content-Type': 'application/json' }); 
+            //res.writeHead(200, { 'Content-Type': 'application/json' }); 
             res.send(result);
         }
     })
@@ -134,12 +140,12 @@ app.put('/change', async(req,res) => {      //zmenie udajov o nehnutelnosti
     [type, size, price, description, rooms, property_id, user_id],
     (err,result) => {
         if (err){
-            res.writeHead(400, { 'Content-Type': 'application/json' }); 
+            //res.writeHead(400, { 'Content-Type': 'application/json' }); 
             res.send("Oops semething went wrong");
             console.log(err);
         }
         else{
-            res.writeHead(200, { 'Content-Type': 'application/json' }); 
+            //res.writeHead(200, { 'Content-Type': 'application/json' }); 
             res.send(result);
         }
     })
@@ -156,12 +162,12 @@ app.delete('/zmaz', async(req,res) => {     // zmazanie danej nehnuteľnosti
         [property_id,user_id],
          (err,result) => {
             if (err){
-                res.writeHead(400, { 'Content-Type': 'application/json' }); 
+                //res.writeHead(400, { 'Content-Type': 'application/json' }); 
                 res.send("Invalid ID of the property");
                 console.log(err)
             }
             else{
-                res.writeHead(200, { 'Content-Type': 'application/json' }); 
+                //res.writeHead(200, { 'Content-Type': 'application/json' }); 
                 res.send("Property was deleted");
             }
          }
