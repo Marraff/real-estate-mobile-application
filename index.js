@@ -41,13 +41,13 @@ app.post('/newOffer', async(req,res) => {
 
 app.get('/offers', async(req,res) => {      //zobrazenie vsetkych ponuk nehnutelnosti
 
-    db.query("SELECT * FROM property INNER JOIN location ON property.location_id = location.id INNER JOIN posts ON posts.id = property.id ", (err,result) => {
+    db.query("SELECT * FROM property  INNER JOIN location ON property.id = location.property_id INNER JOIN posts ON posts.property_id = property.id", (err,result) => {
             if (err){
-                res.writeHead(400, { 'Content-Type': 'application/json' }); 
+                //res.writeHead(400, { 'Content-Type': 'application/json' }); 
                 console.log(err)
             }
             else{
-                res.writeHead(200, { 'Content-Type': 'application/json' }); 
+                //res.writeHead(200, { 'Content-Type': 'application/json' }); 
                 res.send(result);
             }
          }
