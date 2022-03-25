@@ -11,7 +11,62 @@ paths:
       tags:
         - "Zadanie 2"
       summary: Vráti informácie o ponukách nehnuteľností.
-      description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM posts`
+      description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM posts INNER JOIN users ON posts.users_id = users.id`
+      responses:
+        '200':
+          description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
+          content:
+            application/json:
+              schema: 
+                type: object    
+                properties:  
+                  id:
+                    type: number   
+                  like_status: 
+                    type: integer
+                  added_date:
+                    type: string  
+                  title: 
+                    type: string
+                  text:
+                    type: string 
+                   users_id: 
+                    type: number
+                  property_id:
+                    type: number  
+                  name:
+                    type: string
+                  surname:
+                    type: string
+                  email: 
+                    type: string
+                  telephone: 
+                    type: string
+                  profile_picture_ref:
+                    type: number
+                  image_link:
+                    type: string
+
+                example: 
+                  id: 1,
+                  like_status: 25,
+                  added_date: "2022-01-31T23:00:00.000Z",
+                  title: "Priestranný byt na predaj",
+                  text: "Tento byt sa nachádza v pokojnej časti mesta.",
+                  users_id: 1,
+                  property_id: 1,
+                  name: "Jozef",
+                  surname: "Mikloš",
+                  email: "jozo.miklos@gmail.com",
+                  telephone: "0954555666",
+                  profile_picture_ref: null
+                  image_link: "link_ku_obrazku"
+  /myOffers:
+    get:
+      tags:
+        - "Zadanie 2"
+      summary: Vráti informácie o ponuke nehnuteľností daného používateľa.
+      description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM property INNER JOIN location ON property.location_id = location.id INNER JOIN posts ON posts.property_id = property.id WHERE posts.users_id = ?`
       responses:
         '200':
           description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
@@ -20,31 +75,68 @@ paths:
               schema: 
                 type: object    
                 properties:          
-                  name:
+                  id: 
+                    type: number
+                  type: 
                     type: string
-                  surname:
+                  size: 
+                    type: number
+                  price:
                     type: string
-                  like_status: 
-                    type: integer
-                  added_date:
+                  description: 
                     type: string
-                  title: 
-                    type: string
+                  rooms:
+                    type: number
                   image_link:
                     type: string
+                  location_id:
+                    type: number
+                  users_id:
+                    type: number
+                  state: 
+                    type: string
+                  city: 
+                    type: string
+                  street: 
+                    type: string
+                  postal_code: 
+                    type: string
+                  like_status: 
+                    type: number
+                  added_date: 
+                    type: date
+                  title: 
+                    type: string
+                  text: 
+                    type: string
+                  property_id: 
+                    type: number    
                 example: 
-                  name: 'Jozko'
-                  surname: 'Mrkvicka'
-                  like_status: 56
-                  added_date: '2022-03-22'
-                  title: '2-izbový byt na prenájom v kľudnej časti mesta'
-                                    
+                  
+                  id: 2,
+                  type: "dom",
+                  size: 125,
+                  price: "200000",
+                  description: "Nehnuteľnosť je v zachovalom stave",
+                  rooms: "4",
+                  image_link: "toto je link k obrázku",
+                  location_id: 2,
+                  users_id: 2,
+                  state: "Slovensko",
+                  city: "Ružomberok",
+                  street: "Gorkého 54",
+                  postal_code: "07106",
+                  like_status: 4,
+                  added_date: "2021-04-13T22:00:00.000Z",
+                  title: "Dom na predaj",
+                  text: "Dom sa nachádza v pokojnej časti mesta",
+                  property_id: 2                    
   /register:
     post:
       tags:
         - "Zadanie 2"
       summary: umožní pridanie používateľa do databázy.
-      description: Pre získanie tejto informácie sa použije príkaz `INSERT INTO users (name, surname, email, telephone) VALUES (?,?,?,?)`
+      description: Pre získanie tejto informácie sa použije príkaz `INSERT INTO users (name, surname, email, telephone, profile_picture_ref) VALUES (?,?,?,?,?)`
       responses:
         '200':
           description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
@@ -66,6 +158,76 @@ paths:
                   surname: 'Mrkvicka'
                   email: 'jozko.mrkva@stuba.sk'
                   telephone: '0940111111'
+  /login:
+    put:
+      tags:
+        - "Zadanie 2"
+      summary: umožní prihlásenie používateľa do aplikácie.
+      description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM users WHERE email = ? AND name = ?`
+      responses:
+        '200':
+          description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
+          content:
+            application/json:
+              schema:      
+                type: object
+                properties:     
+                  id:
+                    type: number     
+                  name:
+                    type: string
+                  surname:
+                    type: string
+                  email:
+                    type: string
+                  telephone:
+                    type: string
+                example:
+                  id: 4
+                  name: 'Jozko'
+                  surname: 'Mrkvicka'
+                  email: 'jozko.mrkva@stuba.sk'
+                  telephone: '0940111111'
+                  profille_picture_ref: null
+  /change:
+    put:
+      tags:
+        - "Zadanie 2"
+      summary: umožní zmenenie informácií o nehnuteľnosti používateľa.
+      description: Pre získanie tejto informácie sa použije príkaz `UPDATE property SET type = ?, size = ?, price = ?, description = ?, rooms = ?, image_link = ? WHERE id = ${property_id} AND users_id = ${user_id}`
+      responses:
+        '200':
+          description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
+          content:
+            application/json:
+              schema:      
+                type: object
+                properties:     
+                    property_id: 
+                      type: number
+                    user_id: 
+                      type: number
+                    type: 
+                      type: string
+                    size: 
+                      type: number
+                    price: 
+                      type: string
+                    description: 
+                      type: string
+                    rooms: 
+                      type: number
+                    image_link: 
+                      type: string
+                example:
+                    property_id: 1,
+                    user_id: 1,
+                    type: "dom",
+                    size: 200,
+                    price: "200000",
+                    description: "zmenenie",
+                    rooms: 4,
+                    image_link: "linka"
   /domy:
       get:
         tags:
@@ -101,6 +263,7 @@ paths:
                     added_date: '2022-03-22'
                     title: '2-dom byt na predaj v kľudnej časti mesta'
                     type: 'dom'
+  
   /byty:
       get:
         tags:

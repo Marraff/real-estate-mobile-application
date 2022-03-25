@@ -9,7 +9,6 @@ const bodyParser = require('body-parser');
 
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
-//app.use(express.json())
 
 app.use(cors());
 app.use(express.json());
@@ -35,7 +34,7 @@ app.get('/', async(req,res) => {
 
 app.get('/offers', async(req,res) => {      //zobrazenie vsetkych ponuk nehnutelnosti
 
-    db.query("SELECT * FROM property  INNER JOIN location ON property.location_id = location.id INNER JOIN posts ON posts.property_id = property.id", (err,result) => {
+    db.query("SELECT * FROM posts INNER JOIN users ON posts.users_id = users.id", (err,result) => {
             if (err){
                 res.status(400).send("oops something went wrong!");
                 console.log(err);
@@ -97,8 +96,8 @@ app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikac
     const email = req.body.email;
     const name = req.body.name;
 
-    db.query("SELECT * FROM users WHERE email = ?",
-    [email],
+    db.query("SELECT * FROM users WHERE email = ? AND name = ?",
+    [email,name],
     (err,result) => {
         if (err){
             res.status(400).send("Invalid name or email");
@@ -142,9 +141,18 @@ app.delete('/zmaz', async(req,res) => {     // zmazanie danej nehnuteľnosti
 
     const property_id = req.body.property_id;
     const user_id = req.body.user_id;
-
+    //"DELETE FROM property WHERE id = ? AND users_id = ?",
+    //"DELETE FROM property INNER JOIN location ON property.location_id = location.id INNER JOIN posts ON posts.property_id = property.id WHERE property.id = ? AND posts.users_id = ?",
+//  DELETE location, property, posts 
+//FROM posts INNER JOIN property ON posts.property_id = property.id 
+//INNER JOIN location ON location.id = property.location_id 
+//WHERE property.id = ? AND posts.users_id = ?,
     db.query(
-        "DELETE FROM property WHERE id = ? AND users_id = ?",
+        `SET FOREIGN_KEY_CHECKS=off;
+        DELETE location
+        FROM location  
+        WHERE location.id = 2 
+        SET FOREIGN_KEY_CHECKS=on;`,
         [property_id,user_id],
          (err,result) => {
             if (err){
