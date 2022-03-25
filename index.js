@@ -47,7 +47,7 @@ app.get('/offers', async(req,res) => {      //zobrazenie vsetkych ponuk nehnutel
 });
 
 
-app.get('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouzivatela
+app.put('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouzivatela
 
     const user_id = req.body.user_id;
 
@@ -141,32 +141,38 @@ app.delete('/zmaz', async(req,res) => {     // zmazanie danej nehnuteľnosti
 
     const property_id = req.body.property_id;
     const user_id = req.body.user_id;
-    //"DELETE FROM property WHERE id = ? AND users_id = ?",
-    //"DELETE FROM property INNER JOIN location ON property.location_id = location.id INNER JOIN posts ON posts.property_id = property.id WHERE property.id = ? AND posts.users_id = ?",
-//  DELETE location, property, posts 
-//FROM posts INNER JOIN property ON posts.property_id = property.id 
-//INNER JOIN location ON location.id = property.location_id 
-//WHERE property.id = ? AND posts.users_id = ?,
-    db.query(
-        `SET FOREIGN_KEY_CHECKS=off;
-        DELETE location
-        FROM location  
-        WHERE location.id = 2 
-        SET FOREIGN_KEY_CHECKS=on;`,
-        [property_id,user_id],
-         (err,result) => {
-            if (err){
-                res.status(400).send("Invalid ID of the property");
-                console.log(err)
-            }
-            else{
-                res.status(200).send("Property was deleted");
-            }
-         }
-    );
-
+    
+    db.query(` SET FOREIGN_KEY_CHECKS=0`,
+            (err,result) => {
+                if (err){
+                    res.status(400).send("Invalid");
+                    console.log(err)
+                }
+            });
+                
+    db.query(`DELETE location, property, posts 
+            FROM posts INNER JOIN property ON posts.property_id = property.id 
+            INNER JOIN location ON location.id = property.location_id 
+            WHERE property.id = ? AND posts.users_id = ?`,
+            [property_id,user_id],
+            (err,result) => {
+                if (err){
+                    res.status(400).send("Invalid ID of the property");
+                    console.log(err)
+                }
+            });
+                            
+    db.query(` SET FOREIGN_KEY_CHECKS=1`,
+            (err,result) => {
+                if (err){
+                    res.status(400).send("Invalid");
+                    console.log(err)
+                }
+                else{
+                    res.status(200).send("property was deleted");
+                }
+            });         
 });
-
 
 
 ///////

@@ -63,20 +63,21 @@ paths:
                   profile_picture_ref: null
                   image_link: "link_ku_obrazku"
   /myOffers:
-      get:
+      put:
         tags:
           - "Zadanie 2"
         summary: Vráti informácie o ponuke nehnuteľností daného používateľa.
         description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM property INNER JOIN location ON property.location_id = location.id INNER JOIN posts ON posts.property_id = property.id WHERE posts.users_id = ?`
-        parameters:
-          - in: query
-            name: student_id
-            required: true
-            schema:
-              type: number
-              example: 4
-              
-        
+        requestBody:
+          content: 
+            application/json:
+              schema:      
+                type: object
+                properties:          
+                  user_id:
+                    type: number
+                example: 
+                  user_id: 1
         responses:
           '200':
             description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
@@ -341,7 +342,10 @@ paths:
       tags:
         - "Zadanie 2"
       summary: Zmaže zadaný inzerát.
-      description: Pre zmazanie daného inzerátu sa použije príkaz `DELETE FROM posts WHERE id =  `
+      description: Pre zmazanie daného inzerátu sa použije príkaz `DELETE location, property, posts 
+            FROM posts INNER JOIN property ON posts.property_id = property.id 
+            INNER JOIN location ON location.id = property.location_id 
+            WHERE property.id = ? AND posts.users_id = ? `
       responses:
           '200':
             description: Property was deleted.
