@@ -162,11 +162,14 @@ paths:
                   type: string
                 telephone:
                   type: string
+                profile_picture_ref:
+                  type: string
               example: 
                 name: 'Jozko'
                 surname: 'Mrkvicka'
                 email: 'jozko.mrkva@stuba.sk'
                 telephone: '0940111111'
+                profile_picture_ref: 'UnknownImage.jpg'
       responses:
         '200':
           description: User was created.
@@ -220,7 +223,7 @@ paths:
                   surname: 'Mrkvicka'
                   email: 'jozko.mrkva@stuba.sk'
                   telephone: '0940111111'
-                  profille_picture_ref: null
+                  profille_picture_ref: 'UnknownProfile.jpg'
   /change:
     put:
       tags:

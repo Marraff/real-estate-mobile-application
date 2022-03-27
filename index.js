@@ -3,12 +3,15 @@ const app = express();
 const db = require('./connect.js');
 const cors = require('cors');
 var http = require('http');
-
+const fileUpload = require('express-fileUpload');
 
 const bodyParser = require('body-parser');
+//const __dirname = path.resolve(path.dirname(''));
+console.log(__dirname);
 
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
+app.use(fileUpload());
 
 app.use(cors());
 app.use(express.json());
@@ -71,11 +74,26 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
     const surname = req.body.surname;
     const email = req.body.email;
     const telephone = req.body.telephone;
-    const profile_picture = req.body.profile_picture;
+    //const profile_picture = req.body.profile_picture;
+    var profile_picture;
+    var uploadPath;
+
+    if(!req.files || Object.keys(req.files).lenth === 0){
+        profile_picture = 0;
+    }
+    else{
+        profile_picture = req.files.profile_picture;
+        uploadPath = __dirname + '/upload/' + profile_picture.name;
+        profile_picture.mv(uploadPath, function(err){
+            if(err){
+                return res.status(400).send(err);
+            }
+        })
+    }
     
     db.query(
         "INSERT INTO users (name, surname, email, telephone, profile_picture_ref) VALUES (?,?,?,?,?)",
-         [name, surname, email, telephone, profile_picture], 
+         [name, surname, email, telephone, profile_picture.name], 
          (err,result) => {
             if (err){
                 res.status(400).send("Registration wasn't successfull");
@@ -120,10 +138,25 @@ app.put('/change', async(req,res) => {      //zmenie udajov o nehnutelnosti
     const price = req.body.price;
     const description = req.body.description;
     const rooms = req.body.rooms;
-    const image_link = req.body.image_link;
+    //const image_link = req.body.image_link;
+    var image_link;
+    var uploadPath;
+
+    if(req.files || Object.keys(req.files).lenth === 0){
+        image_link = null;
+    }
+    else{
+        image_link = req.files.image_link;
+        uploadPath = __driname + '/upload/' + image_link.name;
+        image_link.mv(uploadPath, function(err){
+            if(err){
+                return res.status(400).send(err);
+            }
+        })
+    }
 
     db.query(`UPDATE property SET type = ?, size = ?, price = ?, description = ?, rooms = ?, image_link = ? WHERE id = ${property_id} AND users_id = ${user_id} `,
-    [type, size, price, description, rooms, image_link ],
+    [type, size, price, description, rooms, image_link.name ],
     (err,result) => {
         if (err){
             res.status(400).send("Oops semething went wrong");
