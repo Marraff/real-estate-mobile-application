@@ -16,6 +16,7 @@ app.use(fileUpload());
 app.use(cors());
 app.use(express.json());
 
+var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
 
 app.listen(8080, ()=>{                          //spustenie servera               
     console.log('Server running at port 8080');
@@ -78,7 +79,7 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
     var profile_picture;
     var uploadPath;
 
-    if(!req.files || Object.keys(req.files).lenth === 0){
+    if(!req.files || Object.keys(req.files).lenth === 0 || !allowedExtensions.exec(filePath)){
         profile_picture = 0;
     }
     else{
@@ -142,7 +143,7 @@ app.put('/change', async(req,res) => {      //zmenie udajov o nehnutelnosti
     var image_link;
     var uploadPath;
 
-    if(req.files || Object.keys(req.files).lenth === 0){
+    if(req.files || Object.keys(req.files).lenth === 0 || !allowedExtensions.exec(filePath)){
         image_link = null;
     }
     else{
