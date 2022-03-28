@@ -4,9 +4,10 @@ const db = require('./connect.js');
 const cors = require('cors');
 var http = require('http');
 const fileUpload = require('express-fileUpload');
-
+var crypto = require("crypto");
 const bodyParser = require('body-parser');
-//const __dirname = path.resolve(path.dirname(''));
+
+
 console.log(__dirname);
 
 app.use(bodyParser.urlencoded({extended:false}));
@@ -16,7 +17,7 @@ app.use(fileUpload());
 app.use(cors());
 app.use(express.json());
 
-var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+var allowedExtensions = /(\.jpg)$/i;
 
 app.listen(8080, ()=>{                          //spustenie servera               
     console.log('Server running at port 8080');
@@ -79,11 +80,13 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
     var profile_picture;
     var uploadPath;
 
-    if(!req.files || Object.keys(req.files).lenth === 0 || !allowedExtensions.exec(filePath)){
+    if(!req.files || Object.keys(req.files).lenth === 0 || !allowedExtensions.exec(req.files.profile_picture.name)){
         profile_picture = 0;
     }
     else{
+        var profile_picture_name = crypto.randomBytes(20).toString('hex')+'.jpg';  // vygenerovanie nahodneho mena suboru
         profile_picture = req.files.profile_picture;
+        profile_picture.name = profile_picture_name;
         uploadPath = __dirname + '/upload/' + profile_picture.name;
         profile_picture.mv(uploadPath, function(err){
             if(err){
@@ -143,12 +146,15 @@ app.put('/change', async(req,res) => {      //zmenie udajov o nehnutelnosti
     var image_link;
     var uploadPath;
 
-    if(req.files || Object.keys(req.files).lenth === 0 || !allowedExtensions.exec(filePath)){
-        image_link = null;
+    if(!req.files || Object.keys(req.files).lenth === 0 || !allowedExtensions.exec(req.files.image_link.name)){
+        image_link = 0;
     }
     else{
+        
+        var image_link_name = crypto.randomBytes(20).toString('hex')+'.jpg';  // vygenerovanie nahodneho mena suboru
         image_link = req.files.image_link;
-        uploadPath = __driname + '/upload/' + image_link.name;
+        image_link.name = image_link_name;
+        uploadPath = __dirname + '/upload/' + image_link.name;
         image_link.mv(uploadPath, function(err){
             if(err){
                 return res.status(400).send(err);
