@@ -125,6 +125,9 @@ app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikac
             res.status(400).send("Invalid name or email");
             console.log(err);
         }
+        if(result.length == 0){
+            res.status(400).send("Invalid name or email");
+        }
         else{
             res.status(200).send(result);
         }
