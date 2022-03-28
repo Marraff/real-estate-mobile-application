@@ -218,6 +218,23 @@ app.delete('/zmaz', async(req,res) => {     // zmazanie danej nehnuteľnosti
 });
 
 
+app.put('/comments', async(req,res) => {    //vypísanie vsetkých komentárov danej nehnutelnosti
+
+    const post_id = req.body.posts_id;
+
+    db.query("SELECT * FROM comments WHERE comments.posts_id = ?",
+    [post_id],
+    (err,result) => {
+        if (err){
+            res.status(400).send("oops something went wrong!");
+            console.log(err);
+        }
+        else{
+            res.status(200).send(result);
+        }
+     });
+});
+
 ///////
 app.get('/byty', async(req,res) => {
     

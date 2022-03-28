@@ -268,7 +268,49 @@ paths:
           description: Change was successfull.
         '400':
           description: Oops something went wrong.
-              
+  /comments:
+    put:
+      tags:
+        - "Zadanie 2"
+      summary: umožní zmenenie informácií o nehnuteľnosti používateľa.
+      description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM comments WHERE comments.posts_id = ?`
+      requestBody:
+        content:
+            application/json:
+              schema:      
+                type: object
+                properties:     
+                    post_id: 
+                      type: number
+                example:
+                    post_id: 1
+                    
+      responses:
+        '200':
+          description: comments are shown.
+          content:
+              application/json:
+                schema: 
+                  type: object   
+                  properties:          
+                    added_date:
+                      type: string
+                    comment: 
+                      type: string
+                    like_status:
+                      type: number
+                    posts_id:
+                      type: number
+                    users_id:
+                      type: number
+                  example: 
+                    added_date: '2022-03-22'
+                    comment: 'naozaj pekne'
+                    like_status: 56
+                    posts_id: 1
+                    user_id: 1 
+        '400':
+          description: Oops something went wrong.           
   /domy:
       get:
         tags:
