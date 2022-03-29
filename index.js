@@ -1,15 +1,20 @@
+const db = require('./connect');
 const express = require('express');
 const app = express();
-const db = require('./connect.js');
 const cors = require('cors');
-var http = require('http');
-const fileUpload = require('express-fileUpload');
-var crypto = require("crypto");
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
+const fileUpload = require('express-fileupload'); //Win version: .. require('express-fileUpload');
+require('dotenv').config()
 
+let http = require('http');
+let crypto = require("crypto");
+let conn = db();
+let allowedExtensions = /(\.jpg)$/i;
+const errMsg = "Oops something went wrong!"
+const salt = "MTAA je super predmet :)";
 
 console.log(__dirname);
-
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 app.use(fileUpload());
@@ -17,235 +22,229 @@ app.use(fileUpload());
 app.use(cors());
 app.use(express.json());
 
-var allowedExtensions = /(\.jpg)$/i;
-
 app.listen(8080, ()=>{                          //spustenie servera               
     console.log('Server running at port 8080');
 });
 
-app.get('/', async(req,res) => {
+async function withTransaction(callback) {
+	try{
+		await conn.beginTransaction();
+		await callback();
+		await conn.commit();
+	} catch (err) {
+		await conn.rollback();
+		throw(err);
+	} finally {
+		await conn.close();
+	}
+}
 
+function generateAccessToken(email){
+	return jwt.sign(email, process.env.TOKEN_SECRET, { expiresIn: '3600s' });
+}
+
+function authenticateToken(req, res) {
+	const { headers: { auth } } = req
+	let token = auth
+ 	jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
+ 		if(err || !decoded){
+ 			return res.json({success: false, message: `Not valid token`});
+		}
+	})
+}
+
+function hash(string){
+	return crypto.createHash('sha256').update(string).digest('hex');
+}
+
+
+app.get('/', async(req,res) => {
     try{
-        
         res.writeHead(200, { 'Content-Type': 'application/json' });        
         res.end(JSON.stringify('Server running'));
-   
+    } catch (err){
+		console.log(err);
+		return res.status(500).send("An error occured");
     }
-    catch{
-        console.error(err.message);         // v pripade chyby vypise chybovu hlasku
-    }
-    
-});
-
-app.get('/offers', async(req,res) => {      //zobrazenie vsetkych ponuk nehnutelnosti
-
-    db.query("SELECT * FROM posts INNER JOIN users ON posts.users_id = users.id", (err,result) => {
-            if (err){
-                res.status(400).send("oops something went wrong!");
-                console.log(err);
-            }
-            else{
-                res.status(200).send(result,2,null);
-            }
-         }
-    );
 });
 
 
-app.put('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouzivatela
+app.get('/offers',  async(req,res) => {      //zobrazenie vsetkych ponuk nehnutelnosti
+	authenticateToken(req, res);
+	try {
+		let query = "SELECT * FROM posts INNER JOIN users ON posts.users_id = users.id"
+		const result = await conn.query(query);
+		return res.status(200).json(result);
+	} catch (err) {
+		console.log(err);
+		return res.status(500).send(errMsg);
+	}
+});
 
+
+app.get('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouzivatela
+	authenticateToken(req, res);
     const user_id = req.body.user_id;
+	
+	try {
+		let query = "SELECT * FROM property INNER JOIN location ON property.location_id = location.id INNER JOIN posts " +
+					"ON posts.property_id = property.id WHERE property.users_id = ?"
+		const result = await conn.query(query, [user_id]);
+		return res.status(200).json(result);
 
-    db.query("SELECT * FROM property INNER JOIN location ON property.location_id = location.id INNER JOIN posts ON posts.property_id = property.id WHERE posts.users_id = ?",
-    [user_id],
-    (err,result) => {
-        if (err){
-            res.status(400).send("oops something went wrong!");
-            console.log(err);
-        }
-        else{
-            res.status(200).send(result);
-        }
-     });
+	} catch (err) {
+		console.log(err);
+		return res.status(400).send(errMsg);
+	}
 });
 
 
 app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
+	const { name, surname, email, telephone, password } = req.body;
+	const token = generateAccessToken({ email: email});
+	const auth = hash(password + salt);
+	let profile_picture = 0;
+
+    if(req.files && Object.keys(req.files).length !== 0 && allowedExtensions.exec(req.files.profile_picture.name)){
+		try {
+			profile_picture = req.files.profile_picture;
+			profile_picture.name = crypto.randomBytes(20).toString('hex') + '.jpg';
+			profile_picture.mv(__dirname + '/upload/' + profile_picture.name);
+		} catch (err){
+			console.log(err);
+			return res.status(400).send("Unable to load image");
+		}
+    } 
     
-    const name = req.body.name;
-    const surname = req.body.surname;
-    const email = req.body.email;
-    const telephone = req.body.telephone;
-    //const profile_picture = req.body.profile_picture;
-    var profile_picture;
-    var uploadPath;
+	try {
+        let query = "INSERT INTO users (name, surname, email, telephone, profile_picture_ref, auth) VALUES (?,?,?,?,?,?)"
+		const result = await conn.query(query,[name, surname, email, telephone, profile_picture.name, auth]);
+		res.set('auth', token);
+		//res.redirect('/offers') - Redirect to homepage, depends on frontend (i.e cookies to get token)
+		return res.status(200).send("User " + name + " was created");
 
-    if(!req.files || Object.keys(req.files).lenth === 0 || !allowedExtensions.exec(req.files.profile_picture.name)){
-        profile_picture = 0;
-    }
-    else{
-        var profile_picture_name = crypto.randomBytes(20).toString('hex')+'.jpg';  // vygenerovanie nahodneho mena suboru
-        profile_picture = req.files.profile_picture;
-        profile_picture.name = profile_picture_name;
-        uploadPath = __dirname + '/upload/' + profile_picture.name;
-        profile_picture.mv(uploadPath, function(err){
-            if(err){
-                return res.status(400).send(err);
-            }
-        })
-    }
-    
-    db.query(
-        "INSERT INTO users (name, surname, email, telephone, profile_picture_ref) VALUES (?,?,?,?,?)",
-         [name, surname, email, telephone, profile_picture.name], 
-         (err,result) => {
-            if (err){
-                res.status(400).send("Registration wasn't successfull");
-                console.log(err)
-            }
-            else{
-                res.status(200).send("User was created");
-            }
-         }
-    );
-
-
+	} catch (err) {
+		console.log(err);
+		return res.status(400).send("Registration wasn't successfull");
+	}
 });
 
 
-app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikacie
+app.post('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikacie
+	const { email, password } = req.body;
 
-    const email = req.body.email;
-    const name = req.body.name;
+	try{
+		if(!email && !password)
+			return res.send("Please enter email and password");
 
-    db.query("SELECT * FROM users WHERE email = ? AND name = ?",
-    [email,name],
-    (err,result) => {
-        if (err){
-            res.status(400).send("Invalid name or email");
-            console.log(err);
-        }
-        if(result.length == 0){
-            res.status(400).send("Invalid name or email");
-        }
-        else{
-            res.status(200).send(result);
-        }
-    })
+		let query = "SELECT name, auth FROM users WHERE email = ?";
+		const result = await conn.query(query, [email]);
+
+		if(result.length == 0)
+			return res.send("User nor registered");
+
+		let db_auth = result[0].auth;
+		if(hash(password + salt) !== db_auth)
+			return res.send("Incorrect Password!");
+
+		let token = generateAccessToken({ email: email });
+		res.set('auth', token);
+		return res.status(200).send("Successfully logged in");
+
+	} catch (err) {
+		console.log(err);
+		return res.status(400).send(errMsg)
+	}
 });
 
 
 app.put('/change', async(req,res) => {      //zmenie udajov o nehnutelnosti
+	authenticateToken(req, res);
+	const { type, size, price, description, rooms, user_id, property_id } = req.body;
+	let image;
 
-    const property_id = req.body.property_id;
-    const user_id = req.body.user_id;
-    
-    const type = req.body.type;
-    const size = req.body.size;
-    const price = req.body.price;
-    const description = req.body.description;
-    const rooms = req.body.rooms;
-    //const image_link = req.body.image_link;
-    var image_link;
-    var uploadPath;
+	if(req.files && Object.keys(req.files).length !== 0 && allowedExtensions.exec(req.files.image_link.name)){
+		try {
+			image = req.files.image_link;
+			image.name = crypto.randomBytes(20).toString('hex') + '.jpg'
+			image.mv(__dirname + '/upload/' + image.name);
+		} catch (err) {
+			console.log(err);
+			return res.status(400).send("Unable to load image");
+		}
+	}
 
-    if(!req.files || Object.keys(req.files).lenth === 0 || !allowedExtensions.exec(req.files.image_link.name)){
-        image_link = 0;
-    }
-    else{
-        
-        var image_link_name = crypto.randomBytes(20).toString('hex')+'.jpg';  // vygenerovanie nahodneho mena suboru
-        image_link = req.files.image_link;
-        image_link.name = image_link_name;
-        uploadPath = __dirname + '/upload/' + image_link.name;
-        image_link.mv(uploadPath, function(err){
-            if(err){
-                return res.status(400).send(err);
-            }
-        })
-    }
-
-    db.query(`UPDATE property SET type = ?, size = ?, price = ?, description = ?, rooms = ?, image_link = ? WHERE id = ${property_id} AND users_id = ${user_id} `,
-    [type, size, price, description, rooms, image_link.name ],
-    (err,result) => {
-        if (err){
-            res.status(400).send("Oops semething went wrong");
-            console.log(err);
-        }
-        else{
-            res.status(200).send("Change was successfull! ");
-        }
-    })
-
+	try {
+		let user_query = "SELECT user_id FROM property WHERE property_id = ?";
+		let update_query = "UPDATE property SET type = ?, size = ?, price = ?, description = ?, rooms = ?, image_link = ? " +
+						   "WHERE id = ${property_id} AND users_id = ${user_id}"; 
+		const user_result = (user_query, [property_id]);
+		
+		if(!result[0].user_id || result[0].user_id != user_id)
+			return res.send("You're not allowed to change this post");
+		
+		await withTransaction( async() => {
+			const update_result = conn.query(update_query,[type, size, price, description, rooms, image.name]);
+			return res.status(200).send("Post edited");	
+		});
+	} catch (err) {
+		console.log(err);
+		return res.status(500).send("Unable to edit post");
+	}
 });
 
 
-app.delete('/zmaz', async(req,res) => {     // zmazanie danej nehnuteľnosti
-
-    const property_id = req.body.property_id;
-    const user_id = req.body.user_id;
+app.delete('/delete', async(req,res) => {     // zmazanie danej nehnuteľnosti
+	authenticateToken(req,res);
+	const { property_id, user_id } = req.body;
     
-    db.query(` SET FOREIGN_KEY_CHECKS=0`,
-            (err,result) => {
-                if (err){
-                    res.status(400).send("Invalid");
-                    console.log(err)
-                }
-            });
-                
-    db.query(`DELETE location, property, posts 
-            FROM posts INNER JOIN property ON posts.property_id = property.id 
-            INNER JOIN location ON location.id = property.location_id 
-            WHERE property.id = ? AND posts.users_id = ?`,
-            [property_id,user_id],
-            (err,result) => {
-                if (err){
-                    res.status(400).send("Invalid ID of the property");
-                    console.log(err)
-                }
-            });
-                            
-    db.query(` SET FOREIGN_KEY_CHECKS=1`,
-            (err,result) => {
-                if (err){
-                    res.status(400).send("Invalid");
-                    console.log(err)
-                }
-                else{
-                    res.status(200).send("property was deleted");
-                }
-            });         
+	try{
+		let user_query = "SELECT user_id FROM property WHERE property_id = ?";
+		let del_query = "DELETE location, property, posts FROM posts INNER JOIN property ON posts.property_id = property.id" +
+            			"INNER JOIN location ON location.id = property.location_id WHERE property.id = ? AND posts.users_id = ?"
+			
+		const user_result = (user_query, [property_id]);
+		if(!result[0].user_id  || result[0].user_id != user_id)
+			return res.send("You're not allowed to delete this post");
+
+		const set_fk_0 = await conn.query("SET FOREIGN_KEY_CHECKS = 0");
+		const del_result = await conn.query(del_query, [property_id, user_id]);
+        const set_fk_1 = await conn.query("SET FOREIGN_KEY_CHECKS = 1");
+		return res.status(200).send("Property deleted");
+
+	} catch(err) {
+		console.log(err);
+		return res.status(500).send("Unable to delete property");
+	}
 });
 
 
 app.put('/comments', async(req,res) => {    //vypísanie vsetkých komentárov danej nehnutelnosti
-
+	authenticateToken(req,res);
     const post_id = req.body.posts_id;
+	
+	try {
+		let query = "SELECT * FROM comments WHERE comments.post_id = ?";
+		const result = conn.query(query, [post_id]);
+		return res.status(200).json(result);
 
-    db.query("SELECT * FROM comments WHERE comments.posts_id = ?",
-    [post_id],
-    (err,result) => {
-        if (err){
-            res.status(400).send("oops something went wrong!");
-            console.log(err);
-        }
-        else{
-            res.status(200).send(result);
-        }
-     });
+	} catch(err) {
+		console.log(err);
+		return res.status(500).send("Unable to load comments");
+	}
 });
 
 
 app.post('/addComment', async(req,res) => {       //pridanie komentára
-    
+
     const posts_id = req.body.posts_id;
     const users_id = req.body.users_id;
     const comment = req.body.comment;
     const date = new Date();
-    
+
     db.query(
         "INSERT INTO comments (posts_id, users_id, comment, like_status,added_date) VALUES (?,?,?,?,?)",
-         [posts_id, users_id, comment, 0, date], 
+         [posts_id, users_id, comment, 0, date],
          (err,result) => {
             if (err){
                 res.status(400).send("Comment wasn't added");
@@ -260,12 +259,12 @@ app.post('/addComment', async(req,res) => {       //pridanie komentára
 
 
 app.post('/postLike', async(req,res) => {       //pridanie liku na post
-    
+
     const post_id = req.body.post_id;
 
     db.query(
         "UPDATE posts SET like_status = like_status+1 WHERE id = ?",
-         [post_id], 
+         [post_id],
          (err,result) => {
             if (err){
                 res.status(400).send("Oops something went wrong");
@@ -280,12 +279,12 @@ app.post('/postLike', async(req,res) => {       //pridanie liku na post
 
 
 app.post('/commentLike', async(req,res) => {       //pridanie liku na koment
-    
+
     const comment_id = req.body.comment_id;
 
     db.query(
         "UPDATE comments SET like_status = like_status+1 WHERE id = ?",
-         [comment_id], 
+         [comment_id],
          (err,result) => {
             if (err){
                 res.status(400).send("Oops something went wrong");
@@ -299,25 +298,64 @@ app.post('/commentLike', async(req,res) => {       //pridanie liku na koment
 });
 
 
-///////
 app.get('/byty', async(req,res) => {
+	authenticateToken(req, res);
     
 });
 
 app.get('/domy', async(req,res) => {
+	authenticateToken(req, res);
     
 });
 
-app.get('/getData', async(req,res) => {
-    
+app.get('/getData/:property_id', async(req,res) => {
+	authenticateToken(req, res);
+	const property_id = req.params.property_id;
+	try {
+		let query = "SELECT user_id, type, size, price, description, rooms FROM property  WHERE property_id = ${property_id}"
+		const result = await conn.query(query);
+		return res.status(200).json(result);
+	} catch (err) {
+		console.log(err);
+		return res.status(400).send(errMsg);
+	}
 });
 
 app.get('/check', async(req,res) => {
+	authenticateToken(req, res);
     
 });
 
 app.post('/newOffer', async(req,res) => {
+	authenticateToken(req, res);
+	const { type, size, price, description, rooms, user_id } = req.body;
+	const { state, city, street, postal_code } = req.body;
+	let image = 0, location_id;
 
+	if(req.files && Object.keys(req.files).length !== 0 && allowedExtensions.exec(req.files.image_link.name)){
+		try {
+			image = req.files.image_link;
+			image.name = crypto.randomBytes(20).toString('hex') + '.jpg'
+			image.mv(__dirname + '/upload/' + image.name);
+		} catch (err) {
+			console.log(err);
+			return res.status(400).send("Unable to load image");
+		}
+	}
+
+	try{
+		let location_query = "INSERT INTO location (state, city, street, postal_code) VALUES (?,?,?,?)";
+		let property_query = "INSERT INTO property (type, size, price, description, rooms, image_link, location_id, users_id) VALUES (?,?,?,?,?,?,?,?)"
+		await withTransaction( async() => {
+			const location_result = await conn.query(location_query, [state, city, street, postal_code])
+			location_id = location_result.insertId;
+			const result = conn.query(property_query, [type, size, price, description, rooms, image.name, location_id, user_id])
+			return res.status(200).send("Post created");
+		});
+	}
+	catch (err){
+		console.log(err);
+		return res.status(400).send(errMsg);
+	}
 });
-
 
