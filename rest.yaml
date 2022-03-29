@@ -175,6 +175,81 @@ paths:
           description: User was created.
         '400':
           description: Registration wasn't successfull.
+  /addComment:
+    post:
+      tags:
+        - "Zadanie 2"
+      summary: umožní pridanie komentáru do databázy.
+      description: Pre získanie tejto informácie sa použije príkaz `INSERT INSERT INTO comments (posts_id, users_id, comment, like_status,added_date) VALUES (?,?,?,?,?)`
+      requestBody:
+        content: 
+          application/json:
+            schema:      
+              type: object
+              properties:          
+                posts_id:
+                  type: number
+                users_id:
+                  type: number
+                comment:
+                  type: string
+               
+              example: 
+                posts_id: 1
+                users_id: 1
+                comment: 'Bol som na obhliadke je to predrazene'
+                
+      responses:
+        '200':
+          description: Comment was created.
+        '400':
+          description: Comment wasn't added.
+  /postLike:
+    post:
+      tags:
+        - "Zadanie 2"
+      summary: umožní pridanie liku do databázy.
+      description: Pre získanie tejto informácie sa použije príkaz `UPDATE posts SET like_status = like_status+1 WHERE id = ?`
+      requestBody:
+        content: 
+          application/json:
+            schema:      
+              type: object
+              properties:          
+                post_id:
+                  type: number
+              example: 
+                post_id: 7
+      
+                
+      responses:
+        '200':
+          description: Like added.
+        '400':
+          description: Oops something went wrong.
+  /commentLike:
+    post:
+      tags:
+        - "Zadanie 2"
+      summary: umožní pridanie liku do databázy.
+      description: Pre získanie tejto informácie sa použije príkaz `UPDATE comments SET like_status = like_status+1 WHERE id = ?`
+      requestBody:
+        content: 
+          application/json:
+            schema:      
+              type: object
+              properties:          
+                comment_id:
+                  type: number
+              example: 
+                comment_id: 2
+      
+                
+      responses:
+        '200':
+          description: Like added.
+        '400':
+          description: Oops something went wrong.
           
   /login:
     put:

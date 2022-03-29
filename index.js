@@ -235,6 +235,70 @@ app.put('/comments', async(req,res) => {    //vypísanie vsetkých komentárov d
      });
 });
 
+
+app.post('/addComment', async(req,res) => {       //pridanie komentára
+    
+    const posts_id = req.body.posts_id;
+    const users_id = req.body.users_id;
+    const comment = req.body.comment;
+    const date = new Date();
+    
+    db.query(
+        "INSERT INTO comments (posts_id, users_id, comment, like_status,added_date) VALUES (?,?,?,?,?)",
+         [posts_id, users_id, comment, 0, date], 
+         (err,result) => {
+            if (err){
+                res.status(400).send("Comment wasn't added");
+                console.log(err)
+            }
+            else{
+                res.status(200).send("Comment added!");
+            }
+         }
+    );
+});
+
+
+app.post('/postLike', async(req,res) => {       //pridanie liku na post
+    
+    const post_id = req.body.post_id;
+
+    db.query(
+        "UPDATE posts SET like_status = like_status+1 WHERE id = ?",
+         [post_id], 
+         (err,result) => {
+            if (err){
+                res.status(400).send("Oops something went wrong");
+                console.log(err)
+            }
+            else{
+                res.status(200).send("Like added!");
+            }
+         }
+    );
+});
+
+
+app.post('/commentLike', async(req,res) => {       //pridanie liku na koment
+    
+    const comment_id = req.body.comment_id;
+
+    db.query(
+        "UPDATE comments SET like_status = like_status+1 WHERE id = ?",
+         [comment_id], 
+         (err,result) => {
+            if (err){
+                res.status(400).send("Oops something went wrong");
+                console.log(err)
+            }
+            else{
+                res.status(200).send("Like added!");
+            }
+         }
+    );
+});
+
+
 ///////
 app.get('/byty', async(req,res) => {
     
