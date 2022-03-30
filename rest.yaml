@@ -218,7 +218,45 @@ paths:
                  
                   email: 'jozko.mrkva@stuba.sk'
                   password: 'Jozko'
-  /change:
+  /changePost:
+    put:
+      tags:
+        - "Zadanie 2"
+      summary: umožní zmenenie informácií o nehnuteľnosti používateľa.
+      description: Pre získanie tejto informácie sa použije príkaz `UPDATE property SET type = ?, size = ?, price = ?, description = ?, rooms = ?, image_link = ? WHERE id = ${property_id} AND users_id = ${user_id}`
+      
+      
+      requestBody:
+        content:
+            application/json:
+              schema:      
+                type: object
+                properties:     
+                   
+                    user_id: 
+                      type: number
+                    post_id:
+                      type: nember
+                    text: 
+                      type: string
+                    title: 
+                      type: string
+                    
+                example:
+                    post_id: 1
+                    user_id: 1
+                   
+                    text: "zmenenie"
+                    
+                    title: "novy title"
+      responses:
+        '200':
+          description: Change was successfull.
+        '500':
+          description: Unable to edit post
+  
+  
+  /changeProperty:
     put:
       tags:
         - "Zadanie 2"
