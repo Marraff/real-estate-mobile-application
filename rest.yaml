@@ -162,6 +162,8 @@ paths:
                   type: string
                 telephone:
                   type: string
+                password:
+                  type: string
                 profile_picture_ref:
                   type: string
               example: 
@@ -169,12 +171,158 @@ paths:
                 surname: 'Mrkvicka'
                 email: 'jozko.mrkva@stuba.sk'
                 telephone: '0940111111'
+                password: 'heslo'
                 profile_picture_ref: 'UnknownImage.jpg'
       responses:
         '200':
           description: User was created.
         '400':
           description: Registration wasn't successfull.
+  
+  /login:
+    post:
+      tags:
+        - "Zadanie 2"
+      summary: umožní prihlásenie používateľa do aplikácie.
+      description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM users WHERE email = ? AND name = ?`
+      
+      requestBody:
+        content: 
+          application/json:
+            schema:      
+              type: object
+              properties:          
+                password:
+                  type: string
+                email:
+                  type: string
+              example: 
+                password: 'Jozko'
+                email: 'jozko.mrkva@stuba.sk'
+      responses:
+        
+        '400':
+          description: Invalid password or email
+        '200':
+          description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
+          content:
+            application/json:
+              schema:      
+                type: object
+                properties:     
+                  email:
+                    type: string
+                  password:
+                    type: string
+                example:
+                 
+                  email: 'jozko.mrkva@stuba.sk'
+                  password: 'Jozko'
+  /change:
+    put:
+      tags:
+        - "Zadanie 2"
+      summary: umožní zmenenie informácií o nehnuteľnosti používateľa.
+      description: Pre získanie tejto informácie sa použije príkaz `UPDATE property SET type = ?, size = ?, price = ?, description = ?, rooms = ?, image_link = ? WHERE id = ${property_id} AND users_id = ${user_id}`
+      
+      
+      requestBody:
+        content:
+            application/json:
+              schema:      
+                type: object
+                properties:     
+                    property_id: 
+                      type: number
+                    user_id: 
+                      type: number
+                    type: 
+                      type: string
+                    size: 
+                      type: number
+                    price: 
+                      type: string
+                    description: 
+                      type: string
+                    rooms: 
+                      type: number
+                    image_link: 
+                      type: string
+                example:
+                    property_id: 1
+                    user_id: 1
+                    type: "dom"
+                    size: 200
+                    price: "200000"
+                    description: "zmenenie"
+                    rooms: 4
+                    image_link: "linka"
+      responses:
+        '200':
+          description: Change was successfull.
+        '500':
+          description: Unable to edit post
+  
+  /delete:
+    delete:
+      tags:
+        - "Zadanie 2"
+      summary: Zmaže zadaný inzerát.
+      description: Pre zmazanie daného inzerátu sa použije príkaz `DELETE location, property, posts 
+            FROM posts INNER JOIN property ON posts.property_id = property.id 
+            INNER JOIN location ON location.id = property.location_id 
+            WHERE property.id = ? AND posts.users_id = ? `
+     
+      responses:
+          '200':
+            description: Property was deleted.
+          '500':
+            description: Unable to delete the property.
+  
+  /comments:
+    put:
+      tags:
+        - "Zadanie 2"
+      summary: umožní zmenenie informácií o nehnuteľnosti používateľa.
+      description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM comments WHERE comments.post_id = ?`
+      requestBody:
+        content:
+            application/json:
+              schema:      
+                type: object
+                properties:     
+                    post_id: 
+                      type: number
+                example:
+                    post_id: 1
+                    
+      responses:
+        '200':
+          description: comments are shown.
+          content:
+              application/json:
+                schema: 
+                  type: object   
+                  properties:          
+                    added_date:
+                      type: string
+                    comment: 
+                      type: string
+                    like_status:
+                      type: number
+                    posts_id:
+                      type: number
+                    users_id:
+                      type: number
+                  example: 
+                    added_date: '2022-03-22'
+                    comment: 'naozaj pekne'
+                    like_status: 56
+                    posts_id: 1
+                    user_id: 1 
+        '400':
+          description: Oops something went wrong.           
+  
   /addComment:
     post:
       tags:
@@ -227,6 +375,7 @@ paths:
           description: Like added.
         '400':
           description: Oops something went wrong.
+          
   /commentLike:
     post:
       tags:
@@ -251,141 +400,43 @@ paths:
         '400':
           description: Oops something went wrong.
           
-  /login:
-    put:
-      tags:
-        - "Zadanie 2"
-      summary: umožní prihlásenie používateľa do aplikácie.
-      description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM users WHERE email = ? AND name = ?`
-      
-      requestBody:
-        content: 
-          application/json:
-            schema:      
-              type: object
-              properties:          
-                name:
-                  type: string
-                email:
-                  type: string
-              example: 
-                name: 'Jozko'
-                email: 'jozko.mrkva@stuba.sk'
-      responses:
-        
-        '400':
-          description: Invalid name or email
-        '200':
-          description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
-          content:
-            application/json:
-              schema:      
-                type: object
-                properties:     
-                  id:
-                    type: number     
-                  name:
-                    type: string
-                  surname:
-                    type: string
-                  email:
-                    type: string
-                  telephone:
-                    type: string
-                example:
-                  id: 4
-                  name: 'Jozko'
-                  surname: 'Mrkvicka'
-                  email: 'jozko.mrkva@stuba.sk'
-                  telephone: '0940111111'
-                  profille_picture_ref: 'UnknownProfile.jpg'
-  /change:
-    put:
-      tags:
-        - "Zadanie 2"
-      summary: umožní zmenenie informácií o nehnuteľnosti používateľa.
-      description: Pre získanie tejto informácie sa použije príkaz `UPDATE property SET type = ?, size = ?, price = ?, description = ?, rooms = ?, image_link = ? WHERE id = ${property_id} AND users_id = ${user_id}`
-      
-      
-      requestBody:
-        content:
-            application/json:
-              schema:      
-                type: object
-                properties:     
-                    property_id: 
-                      type: number
-                    user_id: 
-                      type: number
-                    type: 
-                      type: string
-                    size: 
-                      type: number
-                    price: 
-                      type: string
-                    description: 
-                      type: string
-                    rooms: 
-                      type: number
-                    image_link: 
-                      type: string
-                example:
-                    property_id: 1
-                    user_id: 1
-                    type: "dom"
-                    size: 200
-                    price: "200000"
-                    description: "zmenenie"
-                    rooms: 4
-                    image_link: "linka"
-      responses:
-        '200':
-          description: Change was successfull.
-        '400':
-          description: Oops something went wrong.
-  /comments:
-    put:
-      tags:
-        - "Zadanie 2"
-      summary: umožní zmenenie informácií o nehnuteľnosti používateľa.
-      description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM comments WHERE comments.posts_id = ?`
-      requestBody:
-        content:
-            application/json:
-              schema:      
-                type: object
-                properties:     
-                    post_id: 
-                      type: number
-                example:
-                    post_id: 1
-                    
-      responses:
-        '200':
-          description: comments are shown.
-          content:
+  /byty:
+      get:
+        tags:
+          - "Zadanie 2"
+        summary: Vráti dostupnú ponuku bytov.
+        description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM posts WHERE type = 'byt' `
+        responses:
+          '200':
+            description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
+            content:
               application/json:
                 schema: 
                   type: object   
                   properties:          
+                    name:
+                      type: string
+                    surname:
+                      type: string
+                    like_status: 
+                      type: integer
                     added_date:
                       type: string
-                    comment: 
+                    title: 
                       type: string
-                    like_status:
-                      type: number
-                    posts_id:
-                      type: number
-                    users_id:
-                      type: number
+                    image_link:
+                      type: string
+                    type:
+                      type: string
                   example: 
-                    added_date: '2022-03-22'
-                    comment: 'naozaj pekne'
+                    name: 'Jozko'
+                    surname: 'Mrkvicka'
                     like_status: 56
-                    posts_id: 1
-                    user_id: 1 
-        '400':
-          description: Oops something went wrong.           
+                    added_date: '2022-03-22'
+                    title: '2-izbový byt na prenájom v kľudnej časti mesta'
+                    type: 'byt' 
+  
+  
   /domy:
       get:
         tags:
@@ -422,53 +473,146 @@ paths:
                     title: '2-dom byt na predaj v kľudnej časti mesta'
                     type: 'dom'
   
-  /byty:
-      get:
-        tags:
-          - "Zadanie 2"
-        summary: Vráti dostupnú ponuku bytov.
-        description: Pre získanie tejto informácie sa použije príkaz `SELECT * FROM posts WHERE type = 'byt' `
-        responses:
-          '200':
-            description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
-            content:
-              application/json:
-                schema: 
-                  type: object   
-                  properties:          
-                    name:
-                      type: string
-                    surname:
-                      type: string
-                    like_status: 
-                      type: integer
-                    added_date:
-                      type: string
-                    title: 
-                      type: string
-                    image_link:
-                      type: string
-                    type:
-                      type: string
-                  example: 
-                    name: 'Jozko'
-                    surname: 'Mrkvicka'
-                    like_status: 56
-                    added_date: '2022-03-22'
-                    title: '2-izbový byt na prenájom v kľudnej časti mesta'
-                    type: 'byt' 
-  /zmaz:
-    delete:
+  /getData/property_id:
+    get:
       tags:
         - "Zadanie 2"
-      summary: Zmaže zadaný inzerát.
-      description: Pre zmazanie daného inzerátu sa použije príkaz `DELETE location, property, posts 
-            FROM posts INNER JOIN property ON posts.property_id = property.id 
-            INNER JOIN location ON location.id = property.location_id 
-            WHERE property.id = ? AND posts.users_id = ? `
+      summary: Vráti informácie o ponukách nehnuteľností.
+      description: Pre získanie tejto informácie sa použije príkaz `SELECT user_id, type, size, price, description, rooms FROM property  WHERE property_id = ${property_id}`
       responses:
-          '200':
-            description: Property was deleted.
-          '400':
-            description: Invalid ID of the property.
+        '200':
+          description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
+          content:
+            application/json:
+              schema: 
+                type: object    
+                properties:  
+                  user_id:
+                    type: number
+                  type:
+                    type: string
+                  size:
+                    type: string
+                  price:
+                    type: string
+                  description:
+                    type: string
+             
+                example: 
+                  user_id: 1
+                  type: "dom"
+                  size: "125"
+                  price: "200000"
+                  description: "toto je popis nehnuteľnosti"
+  /check:
+    get:
+      tags:
+        - "Zadanie 2"
+      summary: Vráti informácie o ponukách nehnuteľností.
+      description: Pre získanie tejto informácie sa použije príkaz ``
+      responses:
+        '200':
+          description: Očakávaná odpoveď vo formáte [JSON](https://www.json.org/json-en.html)
+          content:
+            application/json:
+              schema: 
+                type: object    
+                properties:  
+                  id:
+                    type: number   
+                  like_status: 
+                    type: integer
+                  added_date:
+                    type: string  
+                  title: 
+                    type: string
+                  text:
+                    type: string 
+                  users_id: 
+                    type: number
+                  property_id:
+                    type: number  
+                  name:
+                    type: string
+                  surname:
+                    type: string
+                  email: 
+                    type: string
+                  telephone: 
+                    type: string
+                  profile_picture_ref:
+                    type: number
+                  image_link:
+                    type: string
+
+                example: 
+                  id: 1
+                  like_status: 25
+                  added_date: "2022-01-31T23:00:00.000Z"
+                  title: "Priestranný byt na predaj"
+                  text: "Tento byt sa nachádza v pokojnej časti mesta."
+                  users_id: 1
+                  property_id: 1
+                  name: "Jozef"
+                  surname: "Mikloš"
+                  email: "jozo.miklos@gmail.com"
+                  telephone: "0954555666"
+                  profile_picture_ref: null
+                  image_link: "link_ku_obrazku"
+  
+  /newOffer:
+    post:
+      tags:
+        - "Zadanie 2"
+      summary: umožní pridanie liku do databázy.
+      description: Pre získanie tejto informácie sa použije príkaz `UPDATE comments SET like_status = like_status+1 WHERE id = ?`
+      requestBody:
+        content: 
+          application/json:
+            schema:      
+              type: object
+              properties:          
+                    type: 
+                      type: string
+                    size: 
+                      type: number
+                    price: 
+                      type: string
+                    description: 
+                      type: string
+                    rooms: 
+                      type: number
+                    image_link: 
+                      type: string
+                    user_id:
+                      type: number
+                    state: 
+                      type: string
+                    city: 
+                      type: string
+                    street: 
+                      type: string
+                    postal_code: 
+                      type: string
+              example:
+                    property_id: 1
+                    user_id: 1
+                    type: "dom"
+                    size: 200
+                    price: "200000"
+                    description: "zmenenie"
+                    rooms: 4
+                    image_link: "linka"
+                    state: "Slovensko"
+                    city: "Ružomberok"
+                    street: "Gorkého 54"
+                    postal_code: "07106"
+                    
+      
+                
+      responses:
+        '200':
+          description: Like added.
+        '400':
+          description: Oops something went wrong.
   
