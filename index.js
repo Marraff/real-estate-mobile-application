@@ -88,7 +88,7 @@ app.get('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouziv
 	
 	try {
 		let query = "SELECT * FROM property INNER JOIN location ON property.location_id = location.id INNER JOIN posts " +
-					"ON posts.property_id = property.id WHERE property.users_id = ?"
+					"ON posts.property_id = property.id WHERE post.users_id = ?"
 		const result = await conn.query(query, [user_id]);
 		return res.status(200).json(result);
 
@@ -158,7 +158,30 @@ app.post('/login', async(req,res) => {       //prihlasenie pouzivatela do aplika
 });
 
 
-app.put('/change', async(req,res) => {      //zmenie udajov o nehnutelnosti
+app.put('/changePost', async(req, res) => {
+	authenticateToken(req, res);
+	const {post_id, user_id, title, text} = req.body;
+    
+    try {
+		let user_query = "SELECT users_id FROM posts WHERE id = ?";
+		let update_query = "UPDATE post SET title = ?, text = ? WHERE id = ? "
+
+		const user_result = conn.query(user_query, [post_id]);
+
+		if(!result[0].users_id || result[0].users_id != user_id)
+		return res.send("You're not allowed to change this post");
+
+		await withTransaction( async() => {
+			const update_result = await conn.query(update_query,[title, text, post_id]);
+			return res.status(200).send("Post edited");	
+
+	} catch (err) {
+		console.log(err);
+		return res.status(400).send(errMsg);
+	}
+});
+
+app.put('/changeProperty', async(req,res) => {      //zmenie udajov o nehnutelnosti
 	authenticateToken(req, res);
 	const { type, size, price, description, rooms, user_id, property_id } = req.body;
 	let image;
@@ -175,17 +198,17 @@ app.put('/change', async(req,res) => {      //zmenie udajov o nehnutelnosti
 	}
 
 	try {
-		let user_query = "SELECT user_id FROM property WHERE property_id = ?";
+		let user_query = "SELECT users_id FROM property WHERE property_id = ?";
 		let update_query = "UPDATE property SET type = ?, size = ?, price = ?, description = ?, rooms = ?, image_link = ? " +
 						   "WHERE id = ${property_id} AND users_id = ${user_id}"; 
 		const user_result = (user_query, [property_id]);
 		
-		if(!result[0].user_id || result[0].user_id != user_id)
+		if(!result[0].users_id || result[0].users_id != user_id)
 			return res.send("You're not allowed to change this post");
 		
 		await withTransaction( async() => {
-			const update_result = conn.query(update_query,[type, size, price, description, rooms, image.name]);
-			return res.status(200).send("Post edited");	
+			const update_result = await conn.query(update_query,[type, size, price, description, rooms, image.name]);
+			return res.status(200).send("Property edited");	
 		});
 	} catch (err) {
 		console.log(err);
@@ -199,12 +222,12 @@ app.delete('/delete', async(req,res) => {     // zmazanie danej nehnuteľnosti
 	const { property_id, user_id } = req.body;
     
 	try{
-		let user_query = "SELECT user_id FROM property WHERE property_id = ?";
+		let user_query = "SELECT users_id FROM property WHERE property_id = ?";
 		let del_query = "DELETE location, property, posts FROM posts INNER JOIN property ON posts.property_id = property.id" +
             			"INNER JOIN location ON location.id = property.location_id WHERE property.id = ? AND posts.users_id = ?"
 			
 		const user_result = (user_query, [property_id]);
-		if(!result[0].user_id  || result[0].user_id != user_id)
+		if(!result[0].users_id  || result[0].users_id != user_id)
 			return res.send("You're not allowed to delete this post");
 
 		const set_fk_0 = await conn.query("SET FOREIGN_KEY_CHECKS = 0");
@@ -236,83 +259,89 @@ app.put('/comments', async(req,res) => {    //vypísanie vsetkých komentárov d
 
 
 app.post('/addComment', async(req,res) => {       //pridanie komentára
+	authenticateToken(req, res);
+	const { posts_id, users_id, comment, parrent_id } = req.body;
+	let like_status = 0, date = Date();
 
-    const posts_id = req.body.posts_id;
-    const users_id = req.body.users_id;
-    const comment = req.body.comment;
-    const date = new Date();
+	try {
+		let query = "INSERT INTO comments (posts_id, users_id, comment, like_status,added_date) VALUES (?,?,?,?,?)"
+		const result = conn.query(query, [post_id, users_id, comment, like_status, parrent_id, add_date]);
+		return res.status(200).send("Comment added!");
 
-    db.query(
-        "INSERT INTO comments (posts_id, users_id, comment, like_status,added_date) VALUES (?,?,?,?,?)",
-         [posts_id, users_id, comment, 0, date],
-         (err,result) => {
-            if (err){
-                res.status(400).send("Comment wasn't added");
-                console.log(err)
-            }
-            else{
-                res.status(200).send("Comment added!");
-            }
-         }
-    );
+	} catch (err) {
+		console.log(err);
+		return res.status(400).send("Comment wasn't added");
+	}
 });
 
 
 app.post('/postLike', async(req,res) => {       //pridanie liku na post
-
+	authenticateToken(req, res);
     const post_id = req.body.post_id;
 
-    db.query(
-        "UPDATE posts SET like_status = like_status+1 WHERE id = ?",
-         [post_id],
-         (err,result) => {
-            if (err){
-                res.status(400).send("Oops something went wrong");
-                console.log(err)
-            }
-            else{
-                res.status(200).send("Like added!");
-            }
-         }
-    );
+	try {
+		let query = "UPDATE posts SET like_status = like_status + 1 WHERE id = ?";
+		const result = conn.querry(query, [post_id]);
+		return res.status(200).send("Like added!");
+	} catch (err) {
+		console.log(err);
+		return res.status(400).send(errMsg);
+	}
 });
 
 
 app.post('/commentLike', async(req,res) => {       //pridanie liku na koment
-
+	authenticateToken(req, res);
     const comment_id = req.body.comment_id;
+	try {
+		let query = "UPDATE comments SET like_status = like_status + 1 WHERE id = ?"
+		const result = conn.query(query, [comment_id]);
+		return res.status(200).send("Like added!");
 
-    db.query(
-        "UPDATE comments SET like_status = like_status+1 WHERE id = ?",
-         [comment_id],
-         (err,result) => {
-            if (err){
-                res.status(400).send("Oops something went wrong");
-                console.log(err)
-            }
-            else{
-                res.status(200).send("Like added!");
-            }
-         }
-    );
+	} catch (err) {
+		console.log(err);
+		return res.status(400).send(errMsg);
+	}
 });
 
 
-app.get('/byty', async(req,res) => {
+app.get('/getByType', async(req, res) => {
 	authenticateToken(req, res);
-    
+	const type = req.body.type;	
+			
+	try {
+		let query = "SELECT * FROM posts INNER JOIN property ON property.id = property_id INNER JOIN users ON users.id = users_id " +
+					"INNER JOIN location ON location.id = property.location_id WHERE property.type = ?";
+		const result = conn.query(query, [type]);
+		return res.status(200).json(result);
+	} catch (err){
+		console.log(err);
+		return res.status(400).send(errMsg);
+	}
+
 });
 
-app.get('/domy', async(req,res) => {
+
+app.get('/getByPrice', async(req, res) => {
 	authenticateToken(req, res);
-    
+	const { state, city } = req.body;
+
+	try {
+		let query = "SELECT * FROM posts INNER JOIN property ON property.id = property_id INNER JOIN users ON users.id = users_id " +
+					"INNER JOIN location ON location.id = property.location_id WHERE location.state = ? AND location.city = ?";
+		const result = conn.query(query, [state, city];
+		return res.status(200).json(result);
+	} catch (err) {
+		console.log(err);
+		return res.status(400).send(errMsg);
+	}
 });
 
 app.get('/getData/:property_id', async(req,res) => {
 	authenticateToken(req, res);
 	const property_id = req.params.property_id;
 	try {
-		let query = "SELECT user_id, type, size, price, description, rooms FROM property  WHERE property_id = ${property_id}"
+		let query = "SELECT users_id, type, size, price, description, rooms FROM property  WHERE property_id = ${property_id}"
 		const result = await conn.query(query);
 		return res.status(200).json(result);
 	} catch (err) {
@@ -321,16 +350,27 @@ app.get('/getData/:property_id', async(req,res) => {
 	}
 });
 
-app.get('/check', async(req,res) => {
-	authenticateToken(req, res);
-    
-});
 
-app.post('/newOffer', async(req,res) => {
+async function check(req, res, post_id){
+	try {
+		let query = "SELECT * FROM posts INNER JOIN users ON users.id = users_id INNER JOIN property ON property.id = property_id " +
+					"INNER JOIN location ON location.id = property.location_id WHERE posts.id = post_id";
+		const result = conn.query(query, [post_id]);
+		return res.status(200).json(result);
+	} catch(err) {
+		console.log(err);
+		return res.status(400).send(errMsg);
+	}
+}
+
+
+app.post('/newPost', async(req,res) => {
 	authenticateToken(req, res);
 	const { type, size, price, description, rooms, user_id } = req.body;
 	const { state, city, street, postal_code } = req.body;
-	let image = 0, location_id;
+	const { title, text } = req.body;
+	let image = 0, location_id, property_id;
+	let like_status = 0, comments_status = 0, add_date = Date();
 
 	if(req.files && Object.keys(req.files).length !== 0 && allowedExtensions.exec(req.files.image_link.name)){
 		try {
@@ -346,10 +386,14 @@ app.post('/newOffer', async(req,res) => {
 	try{
 		let location_query = "INSERT INTO location (state, city, street, postal_code) VALUES (?,?,?,?)";
 		let property_query = "INSERT INTO property (type, size, price, description, rooms, image_link, location_id, users_id) VALUES (?,?,?,?,?,?,?,?)"
+		let post_query = "INSERT INTO posts (add_date, title, text, users_id, property_id, like_status, comments_status) VALUES (?,?,?,?,?,?)"
 		await withTransaction( async() => {
 			const location_result = await conn.query(location_query, [state, city, street, postal_code])
 			location_id = location_result.insertId;
-			const result = conn.query(property_query, [type, size, price, description, rooms, image.name, location_id, user_id])
+			const property_result = await conn.query(property_query, [type, size, price, description, rooms, image.name, location_id, user_id])
+			property_id = property_result.insertId;
+			const post_result = await conn.query(property_query, [add_date, title, text, user_id, property_id, like_status, comments_status]);
+			await check(req, res, post_result.insertId);
 			return res.status(200).send("Post created");
 		});
 	}
