@@ -101,7 +101,6 @@ app.get('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouziv
 
 app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 	const { name, surname, email, telephone, password } = req.body;
-	const token = generateAccessToken({ email: email});
 	const auth = hash(password + salt);
 	let profile_picture = 0;
 
@@ -119,8 +118,6 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 	try {
         let query = "INSERT INTO users (name, surname, email, telephone, profile_picture_ref, auth) VALUES (?,?,?,?,?,?)"
 		const result = await conn.query(query,[name, surname, email, telephone, profile_picture.name, auth]);
-		res.set('auth', token);
-		//res.redirect('/offers') - Redirect to homepage, depends on frontend (i.e cookies to get token)
 		return res.status(200).send("User " + name + " was created");
 
 	} catch (err) {
@@ -149,6 +146,7 @@ app.post('/login', async(req,res) => {       //prihlasenie pouzivatela do aplika
 
 		let token = generateAccessToken({ email: email });
 		res.set('auth', token);
+		//res.redirect('/offers') - Redirect to homepage, depends on frontend (i.e cookies to get token)
 		return res.status(200).send("Successfully logged in");
 
 	} catch (err) {
