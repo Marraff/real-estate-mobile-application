@@ -22,8 +22,8 @@ app.use(fileUpload());
 app.use(cors());
 app.use(express.json());
 
-app.listen(8080, ()=>{                          //spustenie servera               
-    console.log('Server running at port 8080');
+app.listen(8000, ()=>{                          //spustenie servera               
+    console.log('Server running at port 8000');
 });
 
 async function withTransaction(callback) {
@@ -70,11 +70,13 @@ app.get('/', async(req,res) => {
 
 
 app.get('/offers',  async(req,res) => {      //zobrazenie vsetkych ponuk nehnutelnosti
-	authenticateToken(req, res);
+	//authenticateToken(req, res);
 	try {
 		let query = "SELECT * FROM posts INNER JOIN users ON posts.users_id = users.id"
 		const result = await conn.query(query);
+		console.log("som tu")
 		return res.status(200).json(result);
+		//res.send(result).status(200)
 	} catch (err) {
 		console.log(err);
 		return res.status(500).send(errMsg);
@@ -108,7 +110,8 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 		try {
 			profile_picture = req.files.profile_picture;
 			profile_picture.name = crypto.randomBytes(20).toString('hex') + '.jpg';
-			profile_picture.mv(__dirname + '/upload/' + profile_picture.name);
+			//profile_picture.mv(__dirname + '/upload/' + profile_picture.name);
+			profile_picture.mv(__dirname + 'FrontEnd/assets/upload/' + profile_picture.name);
 		} catch (err){
 			console.log(err);
 			return res.status(400).send("Unable to load image");
@@ -308,9 +311,9 @@ app.post('/commentLike', async(req,res) => {       //pridanie liku na koment
 
 
 app.put('/getByType', async(req, res) => {
-	authenticateToken(req, res);
+	//authenticateToken(req, res);
 	const type = req.body.type;	
-			
+	
 	try {
 		let query = "SELECT * FROM posts INNER JOIN property ON property.id = posts.property_id INNER JOIN users ON users.id = posts.users_id " +
 					"INNER JOIN location ON location.id = property.location_id WHERE property.type = ?";
@@ -339,9 +342,10 @@ app.put('/getByPrice', async(req, res) => {
 	}
 });
 
-app.put('/getData/:property_id', async(req,res) => {
-	authenticateToken(req, res);
-	const property_id = req.params.property_id;
+app.put('/getData', async(req,res) => {
+	//authenticateToken(req, res);
+	//const property_id = req.params.property_id;
+	const property_id = req.body.property_id;
 	try {
 		let query = "SELECT users_id, type, size, price, description, rooms FROM property  WHERE id = ?"
 		const result = await conn.query(query, [property_id]);

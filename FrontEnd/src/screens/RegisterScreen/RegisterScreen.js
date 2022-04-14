@@ -91,8 +91,8 @@ const styles = StyleSheet.create({
     },
     title:{
         fontSize: 25,
-        fontWeight: 'bolt',
-        color: '#05160' ,  
+        fontWeight: 'bold',
+        color: 'black' ,  
      },
      text: {
         color: 'white' ,

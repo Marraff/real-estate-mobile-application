@@ -7,7 +7,7 @@ import Logo from "../../../assets/images/logo.jpg";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 
-export default class Home extends React.Component{
+export default class Flats extends React.Component{
 
     constructor(props){
         super(props);
@@ -18,7 +18,13 @@ export default class Home extends React.Component{
     }
     
     componentDidMount(){  
-        return fetch('http://10.0.2.2:8000/offers')
+        return fetch('http://10.0.2.2:8000/getByType',{
+            method: 'PUT',
+            headers:{
+                'Content-Type':'application/json'
+                },
+                body: JSON.stringify({"type": "byt"})
+        })
                 .then((response) => response.json())
                 .then((resposneJson) => {
                     this.setState({
@@ -127,116 +133,3 @@ const styles = StyleSheet.create({
         maxHeight: 30,
      },
 })
-
-/*
-
- const onSignPress = () => {
-            console.warn("Sign in");
-            navigation.navigate('SignIsScreen');
-        }
-        const {height} = useWindowDimensions();
-
-        if(this.state.isLoading){
-            return (
-                <View style={styles.root}>
-                    <ActivityIndicator/>
-                </View>
-            )
-        } 
-        else {
-        
-            let offer = this.state.dataSource.map((val,key)=> {
-                
-                return <View key={key} style={styles.root}>
-                            <Image 
-                                source={val.profile_picture_ref} 
-                                style={[styles.profile]} 
-                                resizeMode="contain" 
-                            />
-                            <Text>{val.name}{" "}{val.surname}{" "}{val.add_date.split(" ",4)+" "}</Text>
-                            <Text>{"Title: "+val.title}</Text>
-                            <Text>{"Description: "+val.text}</Text>
-                            <Text>{val.profile_picture_ref}</Text>
-                            
-                            <Image 
-                                source={Logo} 
-                                style={[styles.logo]} 
-                                resizeMode="contain" 
-                            />
-                            <CustomButton text= "Show detail" onPress={onSignPress}></CustomButton>
-                            <CustomButton text= {val.like_status+" Likes"} onPress={onSignPress}></CustomButton>
-                       </View>
-            })
-
-};
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//export default Home ;
-
-
-/*
-//<ScrollView>
-           // <View style={styles.root}>
-            
-              //  <Text>ahoj???</Text>
-                <div>
-                {getOffers}
-                {offers.map((val,key) => {
-
-                return <div className="product"> 
-                    <h3>{val.title}</h3> 
-                    <h2>{val.text} </h2> 
-                    </div>
-
-                })}
-                </div>
-           // </View>
-
-      //  </ScrollView>
-
-  {getOffers}
-            {
-                offers.map((item,index)=> {
-                    return(
-                        <View style={styles.root}>
-                            <Text>ahoj</Text>
-                            <Text>{item.id} ahoj</Text>
-                        </View>
-                    )
-                })
-            }
-
-*/
-/*
-    const navigation = useNavigation();
-    const [offers, setOffers] = useState([]);
-
-    useEffect(()=>{
-        
-        getOffers();
-        console.log(offers)
-    },[]);
-  */  
-
-
-
-
-
-
-
-
-
