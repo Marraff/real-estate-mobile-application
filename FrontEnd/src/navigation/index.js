@@ -10,6 +10,9 @@ import DetailScreen from "../screens/Detail/DetailScreen";
 import Houses from "../screens/Houses/Houses"
 import Flats from "../screens/Flats/Flats";
 import Profile from "../screens/Profile/Profile";
+import AddProperty from "../screens/AddProperty/AddProperty";
+import EditPost from "../screens/EditPost/EditPost";
+import EditProperty from "../screens/EditProperty";
 const Stack = createNativeStackNavigator();
 
 const Navigation = () => {
@@ -24,6 +27,9 @@ const Navigation = () => {
                 <Stack.Screen name="Houses" component={Houses}/>
                 <Stack.Screen name="Flats" component={Flats}/>
                 <Stack.Screen name="Profile" component={Profile}/>
+                <Stack.Screen name="AddProperty" component={AddProperty}/>
+                <Stack.Screen name="EditPost" component={EditPost}/>
+                <Stack.Screen name="EditProperty" component={EditProperty}/>
                 
             </Stack.Navigator>
         </NavigationContainer>

@@ -61,6 +61,39 @@ export default class Profile extends React.Component{
         
         this.props.navigation.navigate('Home',users_id);
     }
+    add = (users_id) => {
+        
+        this.props.navigation.navigate('AddProperty',{user_id: users_id});
+    }
+    deleteProperty = (property_id,user_id) => {
+        console.log(property_id,user_id)
+        fetch('http://10.0.2.2:8000/delete',{
+            method: 'DELETE',
+            headers:{
+                'Content-Type':'application/json'
+                },
+                body: JSON.stringify({"property_id": property_id, "user_id": user_id})
+        })
+                .then((res) => {
+                    console.log(res.status)
+                })
+                .catch((error)=>{
+                    console.log(error);
+                });
+                
+    }
+    editPost = (post_id,user_id) => {
+        //console.log(post_id,user_id)
+        this.props.navigation.navigate('EditPost',{user_id: user_id, post_id: post_id});
+                
+    }
+    editProperty = (property_id,user_id) => {
+        console.log(property_id,user_id)
+        this.props.navigation.navigate('EditProperty',{user_id: user_id, property_id: property_id});
+                
+    }
+
+
     render(){
 
         if(this.state.isLoading){
@@ -91,14 +124,32 @@ export default class Profile extends React.Component{
                                 style={[styles.logo]} 
                                 resizeMode="contain" 
                             />
-                             <CustomButton text= "Show detail" onPress={() => {
-                                this.schowDetail(val.property_id);
-                            }}>
-                                 </CustomButton>
-                            <CustomButton text= "Home page" onPress={()=>{
-                                this.getHome(this.state.users_id)
-                                }}>  
-                                </CustomButton>
+                             <View style={{ flexDirection:"row" }}>
+                             <View style={styles.buttonStyle}>
+                                <Button title= "Show detail" onPress={() => {
+                                    this.schowDetail(val.property_id);
+                                    }}>
+                                </Button>
+                             </View>
+                             <View style={styles.buttonStyle}>
+                                <Button title= "Edit post" onPress={() => {
+                                    this.editPost(val.id,val.users_id);
+                                    }}>
+                                </Button>
+                             </View>
+                             <View style={styles.buttonStyle}>
+                                <Button title= "Edit property" onPress={() => {
+                                    this.editProperty(val.property_id,val.users_id);
+                                    }}>
+                                </Button>
+                             </View>
+                             <View style={styles.buttonStyle}>
+                                <Button title= "Delete" onPress={() => {
+                                    this.deleteProperty(val.property_id,val.users_id);
+                                    }}>
+                                </Button>
+                             </View>
+                             </View>
                        </View>
             })
        
@@ -127,6 +178,11 @@ export default class Profile extends React.Component{
                         <View style={styles.buttonStyle}>
                             <Button title="All offers" onPress={() => {
                                 this.all(this.state.users_id);
+                            }}></Button>
+                        </View>
+                        <View style={styles.buttonStyle}>
+                            <Button title="Add" onPress={() => {
+                                this.add(this.state.users_id);
                             }}></Button>
                         </View>
                     </View>

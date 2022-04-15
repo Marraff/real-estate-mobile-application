@@ -68,7 +68,7 @@ app.get('/', async(req,res) => {
     }
 });
 
-
+//mam
 app.get('/offers',  async(req,res) => {      //zobrazenie vsetkych ponuk nehnutelnosti
 	//authenticateToken(req, res);
 	try {
@@ -82,7 +82,7 @@ app.get('/offers',  async(req,res) => {      //zobrazenie vsetkych ponuk nehnute
 	}
 });
 
-
+//mam
 app.put('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouzivatela
 	//authenticateToken(req, res);
     const user_id = req.body.user_id;
@@ -99,7 +99,7 @@ app.put('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouziv
 	}
 });
 
-
+//mam
 app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 
 	console.log(req.body)
@@ -130,7 +130,7 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 	}
 });
 
-
+//mam
 app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikacie
 
 	const { email, password } = req.body;
@@ -168,10 +168,11 @@ app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikac
 	}
 });
 
-
+//mam
 app.put('/changePost', async(req, res) => {
-	authenticateToken(req, res);
+	//authenticateToken(req, res);
 	const {post_id, user_id, title, text} = req.body;
+	console.log(req.body)
     
     try {
 		let user_query = "SELECT users_id FROM posts WHERE id = ?";
@@ -194,8 +195,9 @@ app.put('/changePost', async(req, res) => {
 	}
 });
 
+//mam
 app.put('/changeProperty', async(req,res) => {      //zmenie udajov o nehnutelnosti
-	authenticateToken(req, res);
+	//authenticateToken(req, res);
 	const { type, size, price, description, rooms, user_id, property_id } = req.body;
 	let image = 0;
 
@@ -229,11 +231,11 @@ app.put('/changeProperty', async(req,res) => {      //zmenie udajov o nehnutelno
 	}
 });
 
-
+//mam
 app.delete('/delete', async(req,res) => {     // zmazanie danej nehnuteľnosti
-	authenticateToken(req,res);
+	//authenticateToken(req,res);
 	const { property_id, user_id } = req.body;
-    
+    console.log(req.body)
 	try{
 		let user_query = "SELECT users_id FROM property WHERE id = ?";
 		let del_query = "DELETE location, property, posts FROM posts INNER JOIN property ON posts.property_id = property.id" +
@@ -288,7 +290,7 @@ app.post('/addComment', async(req,res) => {       //pridanie komentára
 	}
 });
 
-
+//mam
 app.post('/postLike', async(req,res) => {       //pridanie liku na post
 	authenticateToken(req, res);
     const user_id = req.body.user_id;
@@ -319,7 +321,7 @@ app.post('/commentLike', async(req,res) => {       //pridanie liku na koment
 	}
 });
 
-
+//mam
 app.put('/getByType', async(req, res) => {
 	//authenticateToken(req, res);
 	console.log("som tu")
@@ -353,6 +355,7 @@ app.put('/getByPrice', async(req, res) => {
 	}
 });
 
+//mam
 app.put('/getData', async(req,res) => {
 	//authenticateToken(req, res);
 	//const property_id = req.params.property_id;
@@ -381,9 +384,10 @@ async function check(req, res, post_id){
 	}
 }
 
-
+//mam
 app.post('/newPost', async(req,res) => {
-	authenticateToken(req, res);
+	//authenticateToken(req, res);
+	console.log(req.body)
 	const { type, size, price, description, rooms, user_id } = req.body;
 	const { state, city, street, postal_code } = req.body;
 	const { title, text } = req.body;
@@ -406,6 +410,7 @@ app.post('/newPost', async(req,res) => {
 		let property_query = "INSERT INTO property (type, size, price, description, rooms, image_link, location_id, users_id) VALUES (?,?,?,?,?,?,?,?)"
 		let post_query = "INSERT INTO posts (add_date, title, text, users_id, property_id, like_status, comments_status) VALUES (?,?,?,?,?,?,?)"
 		await withTransaction( async() => {
+			
 			const set_fk_0 = await conn.query("SET FOREIGN_KEY_CHECKS = 0");
 			const location_result = await conn.query(location_query, [state, city, street, postal_code])
 			location_id = location_result.insertId;
@@ -415,11 +420,13 @@ app.post('/newPost', async(req,res) => {
 			const set_fk_1 = await conn.query("SET FOREIGN_KEY_CHECKS = 1");
 			
 			await check(req, res, post_result.insertId);
+			
 			//return res.status(200).send("Post created");
 		});
 	}
 	catch (err){
 		console.log(err);
+		
 		return res.status(400).send(errMsg);
 	}
 });
