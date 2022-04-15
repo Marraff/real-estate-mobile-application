@@ -1,5 +1,5 @@
 import React from "react";
-import {View, Text, ScrollView, StyleSheet, ActivityIndicator,Image, useWindowDimensions} from "react-native";
+import {View, Text, ScrollView, StyleSheet, ActivityIndicator,Image, useWindowDimensions, Button} from "react-native";
 import Axios from "axios"
 import {useState, useEffect} from "react"
 import { render } from "express/lib/response";
@@ -7,13 +7,14 @@ import Logo from "../../../assets/images/logo.jpg";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 
-export default class Houses extends React.Component{
+export default class Flats extends React.Component{
 
     constructor(props){
         super(props);
         this.state = {
             isLoading: true,
             dataSource: null,
+            users_id: this.props.route.params,
         }
     }
     
@@ -36,24 +37,47 @@ export default class Houses extends React.Component{
                     console.log(error);
                 });
     }
+
+    giveLike = (user_id,property_id) => {
+        fetch('http://10.0.2.2:8000/postLike',{
+            method: 'POST',
+            headers:{
+                'Content-Type':'application/json'
+                },
+                body: JSON.stringify({"user_id": user_id, "property_id": property_id})
+        })
+                .then((res) => {
+                    console.log(res.status)
+                })
+                .catch((error)=>{
+                    console.log(error);
+                });
+                
+     }
+    schowDetail = (property_id) => {
+        
+        this.props.navigation.navigate('DetailScreen',property_id);
+    }
+    profile = (users_id) => {
+           
+        this.props.navigation.navigate('Profile',users_id);
+    }
+    housesOnly = (users_id) => {
+            
+        this.props.navigation.navigate('Houses',users_id);
+    }
+    flatsOnly = (users_id) => {
+        
+        this.props.navigation.navigate('Flats',users_id);
+    }
+    all = (users_id) => {
+        
+        this.props.navigation.navigate('Home',users_id);
+    }
     render(){
 
-        const onSignPress = () => {
-           
-            this.props.navigation.navigate('DetailScreen');
-        }
-        const housesOnly = () => {
-            
-            this.props.navigation.navigate('Houses');
-        }
-        const flatsOnly = () => {
-            
-            this.props.navigation.navigate('Flats');
-        }
-        const all = () => {
-            
-            this.props.navigation.navigate('Home');
-        }
+        
+       
 
         if(this.state.isLoading){
             return (
@@ -83,17 +107,46 @@ export default class Houses extends React.Component{
                                 style={[styles.logo]} 
                                 resizeMode="contain" 
                             />
-                            <CustomButton text= "Show detail" onPress={onSignPress}></CustomButton>
-                            <CustomButton text= {val.like_status+" Likes"} onPress={onSignPress}></CustomButton>
+                             <CustomButton text= "Show detail" onPress={() => {
+                                this.schowDetail(val.property_id);
+                            }}>
+                                 </CustomButton>
+                            <CustomButton text= {val.like_status+" Likes"} onPress={()=>{
+                                this.giveLike(val.users_id,val.property_id)
+                                }}>  
+                                </CustomButton>
                        </View>
             })
        
             return(
                 <ScrollView>
                     <View style={styles.text}>
-                    <CustomButton text= "Houses only" onPress={housesOnly}></CustomButton>
-                    <CustomButton text= "Flats only" onPress={flatsOnly}></CustomButton>
-                    <CustomButton text= "all" onPress={all}></CustomButton>
+                    <View style={{ flexDirection:"row" }}>
+                        <View style={styles.buttonStyle}>
+                                <Button title="Profile" onPress={() => {
+                                this.profile(this.state.users_id);
+                            }}></Button>
+                        </View>
+                        <View style={styles.buttonStyle}>
+                            <Button title="Call"></Button>
+                        </View>
+                        <View style={styles.buttonStyle}>
+                            <Button title="Houses" oonPress={() => {
+                                this.housesOnly(this.state.users_id);
+                            }}></Button>
+                        </View>
+                        <View style={styles.buttonStyle}>
+                            <Button title="Flats"  onPress={() => {
+                                this.flatsOnly(this.state.users_id);
+                            }}></Button>
+                        </View>
+                        <View style={styles.buttonStyle}>
+                            <Button title="All offers" onPress={() => {
+                                this.all(this.state.users_id);
+                            }}></Button>
+                        </View>
+                    </View>
+                   
                     {offer}
                     
                     </View>
@@ -132,4 +185,8 @@ const styles = StyleSheet.create({
         width: '15%',
         maxHeight: 30,
      },
+     buttonStyle: {
+        marginHorizontal: 2,
+        marginTop: 5
+      },
 })

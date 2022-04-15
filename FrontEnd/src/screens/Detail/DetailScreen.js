@@ -15,16 +15,19 @@ export default class DetailScreen extends React.Component{
         this.state = {
             isLoading: true,
             dataSource: null,
+            property_id: this.props.route.params,
         }
     }
     
-    componentDidMount(){  
+    //componentDidMount(){  
+    
+    componentDidMount(){
         return fetch('http://10.0.2.2:8000/getData',{
             method: 'PUT',
             headers:{
                 'Content-Type':'application/json'
                 },
-                body: JSON.stringify({"property_is": val.proerty_id})
+                body: JSON.stringify({"property_id": this.state.property_id})
         })
                 .then((response) => response.json())
                 .then((resposneJson) => {
@@ -40,11 +43,9 @@ export default class DetailScreen extends React.Component{
     render(){
 
         const onSignPress = () => {
-            console.warn("Home page");
-            //navigation.navigate('SignIsScreen');
             this.props.navigation.navigate('Home');
         }
-        //const {height} = useWindowDimensions();
+        
 
         if(this.state.isLoading){
             return (
@@ -64,9 +65,11 @@ export default class DetailScreen extends React.Component{
                                 style={[styles.profile]} 
                                 resizeMode="contain" 
                             />
-                            <Text>{val.name}{" "}{val.surname}{" "}{val.add_date.split(" ",4)+" "}</Text>
-                            <Text>{"Title: "+val.title}</Text>
-                            <Text>{"Description: "+val.text}</Text>
+                            <Text>{"Type: "+val.type}</Text>
+                            <Text>{"Size: "+val.size+" m2"}</Text>
+                            <Text>{"Price: "+val.price}</Text>
+                            <Text>{"rooms: "+val.rooms}</Text>
+                            <Text>{"Description: "+val.description}</Text>
                             <Text>{val.profile_picture_ref}</Text>
                             
                             <Image 
@@ -75,7 +78,6 @@ export default class DetailScreen extends React.Component{
                                 resizeMode="contain" 
                             />
                             <CustomButton text= "Home page" onPress={onSignPress}></CustomButton>
-                            <CustomButton text= {val.like_status+" Likes"} onPress={onSignPress}></CustomButton>
                        </View>
             })
        

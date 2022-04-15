@@ -13,8 +13,34 @@ const SignInScreen = () => {
     const {height} = useWindowDimensions();
     const navigation = useNavigation();
     const onSignPress = () => {
-        console.warn("Sign in");
-        navigation.navigate('Home');
+      
+        fetch('http://10.0.2.2:8000/login',{
+            method: 'PUT',
+            headers:{
+                'Content-Type':'application/json'
+                },
+                body: JSON.stringify({
+                   
+                    "email": email ,
+                    "password": password
+                })
+        })
+        .then((response) => {
+            console.log(response.status)
+
+            if (response.status == 200){
+
+                response.json()
+                .then((resposneJson) => {
+                    console.log(resposneJson);
+                    navigation.navigate('Home',resposneJson);
+                })
+             }
+        })
+        .catch((error)=>{
+            console.log(error);
+
+        })
     }
     const onSignUpPressed = () => {
         console.warn("Register");

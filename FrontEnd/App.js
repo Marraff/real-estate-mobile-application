@@ -11,7 +11,7 @@
  import SignInScreen from './src/screens/SignInScreen';
  import RegisterScreen from './src/screens/RegisterScreen/RegisterScreen';
  import Navigation from './src/navigation';
-
+ import Profile from './src/screens/Profile/Profile';
 
  const App = ()=>  {
    

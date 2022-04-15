@@ -7,7 +7,7 @@ import Logo from "../../../assets/images/logo.jpg";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 
-export default class Home extends React.Component{
+export default class Profile extends React.Component{
 
     constructor(props){
         super(props);
@@ -19,42 +19,35 @@ export default class Home extends React.Component{
     }
     
     componentDidMount(){  
-        return fetch('http://10.0.2.2:8000/offers')
+        return fetch('http://10.0.2.2:8000/myOffers',{
+            method: 'PUT',
+            headers:{
+                'Content-Type':'application/json'
+                },
+                body: JSON.stringify({"user_id": this.state.users_id})
+        })
                 .then((response) => response.json())
                 .then((resposneJson) => {
                     this.setState({
                         isLoading: false,
                         dataSource: resposneJson,
                     })
-                    //console.log(resposneJson)
                 })
                 .catch((error)=>{
                     console.log(error);
                 });
     }
-    giveLike = (user_id,property_id) => {
-       fetch('http://10.0.2.2:8000/postLike',{
-           method: 'POST',
-           headers:{
-               'Content-Type':'application/json'
-               },
-               body: JSON.stringify({"user_id": user_id, "property_id": property_id})
-       })
-               .then((res) => {
-                   console.log(res.status)
-               })
-               .catch((error)=>{
-                   console.log(error);
-               });
-               
+    getHome = (users_id) => {
+        this.props.navigation.navigate('Home',users_id);
+                
+     }
+    profile = (users_id) => {
+           
+        this.props.navigation.navigate('Profile',users_id);
     }
     schowDetail = (property_id) => {
         
         this.props.navigation.navigate('DetailScreen',property_id);
-    }
-    profile = (id) => {
-           
-        this.props.navigation.navigate('Profile',id);
     }
     housesOnly = (users_id) => {
             
@@ -102,8 +95,8 @@ export default class Home extends React.Component{
                                 this.schowDetail(val.property_id);
                             }}>
                                  </CustomButton>
-                            <CustomButton text= {val.like_status+" Likes"} onPress={()=>{
-                                this.giveLike(val.users_id,val.property_id)
+                            <CustomButton text= "Home page" onPress={()=>{
+                                this.getHome(this.state.users_id)
                                 }}>  
                                 </CustomButton>
                        </View>
@@ -181,7 +174,3 @@ const styles = StyleSheet.create({
         marginTop: 5
       },
 })
-
-
-
-

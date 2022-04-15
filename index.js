@@ -74,7 +74,6 @@ app.get('/offers',  async(req,res) => {      //zobrazenie vsetkych ponuk nehnute
 	try {
 		let query = "SELECT * FROM posts INNER JOIN users ON posts.users_id = users.id"
 		const result = await conn.query(query);
-		console.log("som tu")
 		return res.status(200).json(result);
 		//res.send(result).status(200)
 	} catch (err) {
@@ -85,7 +84,7 @@ app.get('/offers',  async(req,res) => {      //zobrazenie vsetkych ponuk nehnute
 
 
 app.put('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouzivatela
-	authenticateToken(req, res);
+	//authenticateToken(req, res);
     const user_id = req.body.user_id;
 	
 	try {
@@ -102,6 +101,8 @@ app.put('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouziv
 
 
 app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
+
+	console.log(req.body)
 	const { name, surname, email, telephone, password } = req.body;
 	const auth = hash(password + salt);
 	let profile_picture = 0;
@@ -130,29 +131,37 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 });
 
 
-app.post('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikacie
-	const { email, password } = req.body;
+app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikacie
 
+	const { email, password } = req.body;
+	console.log(email,password)
 	try{
 		if(!email && !password)
 			return res.send("Please enter email and password");
 
-		let query = "SELECT name, auth FROM users WHERE email = ?";
+		let query = "SELECT id, name, auth FROM users WHERE email = ?";
 		const result = await conn.query(query, [email]);
 
-		if(result.length == 0)
-			return res.send("User nor registered");
-
+		if(result[0].name == 0 || !result[0].name || !result){
+			console.log("user not registered")
+			return res.status(400).send("User nor registered");
+		}
 		let db_auth = result[0].auth;
-		if(hash(password + salt) !== db_auth)
-			return res.send("Incorrect Password!");
+		if(hash(password + salt) !== db_auth){
 
+			console.log("incorect password")
+			return res.status(400).send("Incorrect Password!");
+		}
 		let token = generateAccessToken({ email: email });
 		res.set('auth', token);
 		console.log(token)
 		//res.redirect('/offers') - Redirect to homepage, depends on frontend (i.e cookies to get token)
-		return res.status(200).send("Successfully logged in");
-
+		if(hash(password + salt) == db_auth ){
+			console.log("hesla sa rovnaju")
+			//return res.status(200).send("Successfully logged in");
+			console.log(result[0].id)
+			return res.status(200).json(result[0].id);
+		}
 	} catch (err) {
 		console.log(err);
 		return res.status(400).send(errMsg)
@@ -282,11 +291,12 @@ app.post('/addComment', async(req,res) => {       //pridanie komentára
 
 app.post('/postLike', async(req,res) => {       //pridanie liku na post
 	authenticateToken(req, res);
-    const post_id = req.body.post_id;
+    const user_id = req.body.user_id;
+	const property_id = req.body.property_id;
 
 	try {
-		let query = "UPDATE posts SET like_status = like_status + 1 WHERE id = ?";
-		const result = await conn.query(query, [post_id]);
+		let query = "UPDATE posts SET like_status = like_status + 1 WHERE users_id = ? AND property_id = ?";
+		const result = await conn.query(query, [user_id,property_id]);
 		return res.status(200).send("Like added!");
 	} catch (err) {
 		console.log(err);
@@ -312,6 +322,7 @@ app.post('/commentLike', async(req,res) => {       //pridanie liku na koment
 
 app.put('/getByType', async(req, res) => {
 	//authenticateToken(req, res);
+	console.log("som tu")
 	const type = req.body.type;	
 	
 	try {

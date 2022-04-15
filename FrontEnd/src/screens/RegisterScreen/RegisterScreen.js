@@ -22,8 +22,31 @@ const RegisterScreen = () => {
     const navigation = useNavigation();
     
     const onSignUpPressed = () => {
-        console.warn("registered");
-        navigation.navigate('SignIn');
+        
+        if (name.length>0 && surname.length>0 && email.length>0 && telephone.length>0 && password.length>0 && confirmPassword.length>0 && password==confirmPassword ){
+            fetch('http://10.0.2.2:8000/register',{
+                method: 'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                    },
+                    body: JSON.stringify({
+                        "name": name,
+                        "surname": surname,
+                        "email": email ,
+                        "telephone": telephone,
+                        "password": password
+                    })
+            })
+            .then((response)=> {
+                if (response.status == 200 ){
+                    console.log("User added to database");
+                    navigation.navigate('SignIn');
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            })
+        }
     }
     const onTermsOfUse = () => {
         console.warn('not ready yet');
