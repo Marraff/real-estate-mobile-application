@@ -1,17 +1,31 @@
 import React, {useState} from "react";
-import {View, Text, Image, StyleSheet, useWindowDimensions, ScrollView} from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { View, Text, Image, StyleSheet, useWindowDimensions, useEffect, ScrollView} from "react-native";
 
 
 import Logo from "../../../assets/images/logo_name.png";
 import CustomInput from "../../components/customInput";
 import CustomButton from "../../components/CustomButton";
-import { useNavigation } from "@react-navigation/native";
 
-const SignInScreen = () => {
+const SignInScreen = ({navigation}) => {
+	const checkAuth = async () => {
+		const token = await AsyncStorage.getItem('LOGIN_TOKEN');
+		if(token !== null){
+			fetch('http://10.0.2.2:8000/logCheck', {
+				method: 'PUT',
+				headers: {
+					'Content-Type':'application/json',
+					'auth': token
+				},
+			})
+			.then(response => { if(response.status == 200) navigation.replace('MainStack') ; })
+		}
+	}
+	checkAuth()
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const {height} = useWindowDimensions();
-    const navigation = useNavigation();
     const onSignPress = () => {
         fetch('http://10.0.2.2:8000/login',{
             method: 'PUT',
@@ -24,16 +38,14 @@ const SignInScreen = () => {
                 })
         })
         .then((response) => {
-            console.log(response.status)
-
             if (response.status == 200){
-
-                response.json()
-                .then((resposneJson) => {
-                    console.log(resposneJson);
-                    navigation.navigate('Home',resposneJson);
-                })
-             }
+				response.text().then(data => {
+					AsyncStorage.setItem('LOGIN_TOKEN', data, () => navigation.replace('MainStack'))
+				})
+			}
+			else if(response.status == 400){
+				response.text().then(data => console.warn(data))
+			}
         })
         .catch((error)=>{
             console.log(error);

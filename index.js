@@ -48,9 +48,12 @@ function authenticateToken(req, res) {
 	let token = auth
  	jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
  		if(err || !decoded){
- 			return res.json({success: false, message: `Not valid token`});
+			console.log(err)
+			return false;
+ 			//return res.status(400).json({success: false, message: `Not valid token`});
 		}
 	})
+	return true;
 }
 
 function hash(string){
@@ -99,10 +102,16 @@ app.put('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouziv
 	}
 });
 
-//mam
-app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 
-	console.log(req.body)
+app.put('/logCheck', async(req, res) => {
+	if(authenticateToken(req,res))
+		return res.status(200).send("Successful");
+	else
+		return res.status(400).send("Token not valid");
+}),
+
+
+app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 	const { name, surname, email, telephone, password } = req.body;
 	const auth = hash(password + salt);
 	let profile_picture = 0;
@@ -111,7 +120,6 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 		try {
 			profile_picture = req.files.profile_picture;
 			profile_picture.name = crypto.randomBytes(20).toString('hex') + '.jpg';
-			//profile_picture.mv(__dirname + '/upload/' + profile_picture.name);
 			profile_picture.mv(__dirname + 'FrontEnd/assets/upload/' + profile_picture.name);
 		} catch (err){
 			console.log(err);
@@ -130,37 +138,25 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 	}
 });
 
-//mam
 app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikacie
-
 	const { email, password } = req.body;
-	console.log(email,password)
 	try{
 		if(!email && !password)
-			return res.send("Please enter email and password");
+			return res.status(400).send("Please enter email and password");
 
 		let query = "SELECT id, name, auth FROM users WHERE email = ?";
 		const result = await conn.query(query, [email]);
 
-		if(result[0].name == 0 || !result[0].name || !result){
-			console.log("user not registered")
+		if(typeof result[0] === 'undefined')
 			return res.status(400).send("User nor registered");
-		}
-		let db_auth = result[0].auth;
-		if(hash(password + salt) !== db_auth){
 
-			console.log("incorect password")
+		let db_auth = result[0].auth;
+		if(hash(password + salt) !== db_auth)
 			return res.status(400).send("Incorrect Password!");
-		}
+		
 		let token = generateAccessToken({ email: email });
-		res.set('auth', token);
-		console.log(token)
-		//res.redirect('/offers') - Redirect to homepage, depends on frontend (i.e cookies to get token)
 		if(hash(password + salt) == db_auth ){
-			console.log("hesla sa rovnaju")
-			//return res.status(200).send("Successfully logged in");
-			console.log(result[0].id)
-			return res.status(200).json(result[0].id);
+			return res.status(200).send(token)
 		}
 	} catch (err) {
 		console.log(err);
@@ -168,7 +164,6 @@ app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikac
 	}
 });
 
-//mam
 app.put('/changePost', async(req, res) => {
 	//authenticateToken(req, res);
 	const {post_id, user_id, title, text} = req.body;
