@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {View, Text, Image, StyleSheet, useWindowDimensions, ScrollView} from "react-native";
 
 
-import Logo from "../../../assets/images/logo.jpg";
+import Logo from "../../../assets/images/logo.png";
 import CustomInput from "../../components/customInput";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
@@ -55,46 +55,20 @@ const RegisterScreen = () => {
     return(
         <ScrollView>
             <View style={styles.root}>
-
                 <Text style={styles.title}> Create Account</Text>
 
-                <CustomInput 
-                    placeholder="name"
-                    value = {name}
-                    setValue = {setName}
-                />
-                <CustomInput 
-                    placeholder="surname"
-                    value = {surname}
-                    setValue = {setSurname}
-                />
-                <CustomInput 
-                    placeholder="email"
-                    value = {email}
-                    setValue = {setEmail}
-                />
-                <CustomInput 
-                    placeholder="telephone"
-                    value = {telephone}
-                    setValue = {setTelephone}
-                />
-                <CustomInput 
-                    placeholder="password"
-                    value = {password}
-                    setValue = {setPassword}
-                    secureTextEntry = {true}
-                />
-                <CustomInput 
-                    placeholder="confirm password"
-                    value = {confirmPassword}
-                    setValue = {setConfirmPassword}
-                    secureTextEntry = {true}
-                />
+                <CustomInput placeholder="name" value = {name} setValue = {setName} />
+                <CustomInput placeholder="surname" value = {surname} setValue = {setSurname} />
+                <CustomInput placeholder="email" value = {email} setValue = {setEmail} />
+                <CustomInput placeholder="telephone" value = {telephone} setValue = {setTelephone} />
+                <CustomInput placeholder="password" value = {password} setValue = {setPassword} secureTextEntry = {true} />
+                <CustomInput placeholder="confirm password" value = {confirmPassword} setValue = {setConfirmPassword} secureTextEntry = {true} />
+
                 <CustomButton text= "Register" onPress={onSignUpPressed}></CustomButton>
                 
-                <Text style={styles.text}>By registering, you confirm that you accept our <Text style={styles.link} onPress={onTermsOfUse}>Terms</Text> of Use and <Text style={styles.link} onPress={onTermsOfUse}>Privacy policy</Text></Text>
-
-
+                <Text style={styles.text}>By registering, you confirm that you accept our 
+					<Text style={styles.link} onPress={onTermsOfUse}>Terms</Text> of Use and 
+					<Text style={styles.link} onPress={onTermsOfUse}>Privacy policy</Text></Text>
             </View>
         </ScrollView>
     );

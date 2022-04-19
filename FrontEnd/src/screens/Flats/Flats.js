@@ -3,7 +3,7 @@ import {View, Text, ScrollView, StyleSheet, ActivityIndicator,Image, useWindowDi
 import Axios from "axios"
 import {useState, useEffect} from "react"
 import { render } from "express/lib/response";
-import Logo from "../../../assets/images/logo.jpg";
+import Logo from "../../../assets/images/logo.png";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 

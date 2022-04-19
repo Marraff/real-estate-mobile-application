@@ -19,7 +19,7 @@ const Navigation = () => {
     
     return(
         <NavigationContainer>
-            <Stack.Navigator screenOptions={{headerShown: false}}>
+            <Stack.Navigator screenOptions={{headerShown: false, cardStyle: {backgroundColor: '#FFFFFF'}}}>
                 <Stack.Screen name="SignIn" component={SignInScreen}/>
                 <Stack.Screen name="Register" component={RegisterScreen}/>
                 <Stack.Screen name="Home" component={Home}/>

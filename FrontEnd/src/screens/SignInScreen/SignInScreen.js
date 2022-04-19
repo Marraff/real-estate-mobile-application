@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {View, Text, Image, StyleSheet, useWindowDimensions, ScrollView} from "react-native";
 
 
-import Logo from "../../../assets/images/logo.jpg";
+import Logo from "../../../assets/images/logo_name.png";
 import CustomInput from "../../components/customInput";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
@@ -13,14 +13,12 @@ const SignInScreen = () => {
     const {height} = useWindowDimensions();
     const navigation = useNavigation();
     const onSignPress = () => {
-      
         fetch('http://10.0.2.2:8000/login',{
             method: 'PUT',
             headers:{
                 'Content-Type':'application/json'
                 },
                 body: JSON.stringify({
-                   
                     "email": email ,
                     "password": password
                 })
@@ -48,27 +46,16 @@ const SignInScreen = () => {
     }
 
     return(
-        <ScrollView>
-            <View style={styles.root}>
-                <Image 
-                    source={Logo} 
-                    style={[styles.logo, {height: height * 0.3}]} 
-                    resizeMode="contain" 
-                />
-                <CustomInput 
-                    placeholder="email"
-                    value = {email}
-                    setValue = {setEmail}
-                />
-                <CustomInput 
-                    placeholder="password"
-                    value = {password}
-                    setValue = {setPassword}
-                    secureTextEntry = {true}
-                />
-                <CustomButton text= "Sign in" onPress={onSignPress}></CustomButton>
-                <CustomButton text= "Don't have an account? Create one!" onPress={onSignUpPressed}></CustomButton>
-            </View>
+        <ScrollView style={{backgroundColor: '#444444'}}>
+			<View style={styles.root}>
+				<Image source={Logo} style={[styles.logo, {height: height * 0.25}]} resizeMode="contain" />
+				<CustomInput placeholder='email' value = {email} setValue = {setEmail} style={styles.inputs} />
+				<CustomInput placeholder='password' value = {password} setValue = {setPassword} secureTextEntry = {true} />
+
+				<CustomButton text= "Sign in" onPress={onSignPress}></CustomButton>
+				<CustomButton text= "Don't have an account? Create one!" onPress={onSignUpPressed}></CustomButton>
+				<View style={styles.box1}></View>
+        	</View>
         </ScrollView>
     );
 };
@@ -78,13 +65,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 20,
         backgroundColor: '#444444',
-
     },
     logo: {
         maxWidth: 380,
         width: '70%',
         maxHeight: 200,
     },
+	
+	inputs: {
+		placeholderTextColor: '#444444',
+	}
 })
 
 export default SignInScreen;
