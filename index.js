@@ -34,26 +34,28 @@ async function withTransaction(callback) {
 	} catch (err) {
 		await conn.rollback();
 		throw(err);
-	} finally {
-		await conn.close();
 	}
+	//} finally {
+	//	await conn.close();
+	//}
 }
 
-function generateAccessToken(email){
-	return jwt.sign(email, process.env.TOKEN_SECRET, { expiresIn: '3600s' });
+function generateAccessToken(id){
+	return jwt.sign({'id': id}, process.env.TOKEN_SECRET, { expiresIn: '3600s' });
 }
 
 function authenticateToken(req, res) {
 	const { headers: { auth } } = req
 	let token = auth
- 	jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
+ 	const result = jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
  		if(err || !decoded){
 			console.log(err)
 			return false;
- 			//return res.status(400).json({success: false, message: `Not valid token`});
 		}
+		req.user_id = decoded.id;
 	})
 	return true;
+	return 4;
 }
 
 function hash(string){
@@ -105,7 +107,7 @@ app.put('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouziv
 
 app.put('/logCheck', async(req, res) => {
 	if(authenticateToken(req,res))
-		return res.status(200).send("Successful");
+		return res.status(200).send(req.user_id.toString());
 	else
 		return res.status(400).send("Token not valid");
 }),
@@ -154,9 +156,9 @@ app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikac
 		if(hash(password + salt) !== db_auth)
 			return res.status(400).send("Incorrect Password!");
 		
-		let token = generateAccessToken({ email: email });
+		let token = generateAccessToken(result[0].id);
 		if(hash(password + salt) == db_auth ){
-			return res.status(200).send(token)
+			return res.status(200).json({'id': result[0].id, 'token': token})
 		}
 	} catch (err) {
 		console.log(err);
@@ -381,13 +383,16 @@ async function check(req, res, post_id){
 
 //mam
 app.post('/newPost', async(req,res) => {
-	//authenticateToken(req, res);
+	if(!authenticateToken(req, res))
+		return res.status(400).send("Invalid token")
+
+	const user_id = req.user_id;	
 	console.log(req.body)
-	const { type, size, price, description, rooms, user_id } = req.body;
+	const { type, size, price, description, rooms } = req.body;
 	const { state, city, street, postal_code } = req.body;
 	const { title, text } = req.body;
 	let image = 0, location_id, property_id;
-	let like_status = 0, comments_status = 0, add_date = Date();
+	let like_status = 0, comments_status = 0, add_date = new Date().toJSON().slice(0, 10);
 
 	if(req.files && Object.keys(req.files).length !== 0 && allowedExtensions.exec(req.files.image_link.name)){
 		try {
@@ -405,7 +410,6 @@ app.post('/newPost', async(req,res) => {
 		let property_query = "INSERT INTO property (type, size, price, description, rooms, image_link, location_id, users_id) VALUES (?,?,?,?,?,?,?,?)"
 		let post_query = "INSERT INTO posts (add_date, title, text, users_id, property_id, like_status, comments_status) VALUES (?,?,?,?,?,?,?)"
 		await withTransaction( async() => {
-			
 			const set_fk_0 = await conn.query("SET FOREIGN_KEY_CHECKS = 0");
 			const location_result = await conn.query(location_query, [state, city, street, postal_code])
 			location_id = location_result.insertId;

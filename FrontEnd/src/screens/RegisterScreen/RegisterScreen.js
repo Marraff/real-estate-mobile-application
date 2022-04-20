@@ -1,28 +1,19 @@
 import React, {useState} from "react";
 import {View, Text, Image, StyleSheet, useWindowDimensions, ScrollView} from "react-native";
 
-
 import Logo from "../../../assets/images/logo.png";
 import CustomInput from "../../components/customInput";
 import CustomButton from "../../components/CustomButton";
-import { useNavigation } from "@react-navigation/native";
 
-
-
-const RegisterScreen = () => {
-
+const RegisterScreen = ({navigation}) => {
     const [name, setName] = useState('');
     const [surname, setSurname] = useState('');
-
     const [email, setEmail] = useState('');
     const [telephone, setTelephone] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     
-    const navigation = useNavigation();
-    
     const onSignUpPressed = () => {
-        
         if (name.length>0 && surname.length>0 && email.length>0 && telephone.length>0 && password.length>0 && confirmPassword.length>0 && password==confirmPassword ){
             fetch('http://10.0.2.2:8000/register',{
                 method: 'POST',
@@ -53,7 +44,7 @@ const RegisterScreen = () => {
     }
 
     return(
-        <ScrollView>
+        <ScrollView style={{backgroundColor: '#444444'}}>
             <View style={styles.root}>
                 <Text style={styles.title}> Create Account</Text>
 
@@ -69,6 +60,7 @@ const RegisterScreen = () => {
                 <Text style={styles.text}>By registering, you confirm that you accept our 
 					<Text style={styles.link} onPress={onTermsOfUse}>Terms</Text> of Use and 
 					<Text style={styles.link} onPress={onTermsOfUse}>Privacy policy</Text></Text>
+				<View></View>	
             </View>
         </ScrollView>
     );
@@ -87,9 +79,11 @@ const styles = StyleSheet.create({
         maxHeight: 200,
     },
     title:{
+		fontFamily: 'Roboto',
         fontSize: 25,
+		padding: 20,
         fontWeight: 'bold',
-        color: 'black' ,  
+        color: '#3B71F7' ,  
      },
      text: {
         color: 'white' ,

@@ -2,7 +2,6 @@ import React, {useState} from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { View, Text, Image, StyleSheet, useWindowDimensions, useEffect, ScrollView} from "react-native";
 
-
 import Logo from "../../../assets/images/logo_name.png";
 import CustomInput from "../../components/customInput";
 import CustomButton from "../../components/CustomButton";
@@ -18,7 +17,11 @@ const SignInScreen = ({navigation}) => {
 					'auth': token
 				},
 			})
-			.then(response => { if(response.status == 200) navigation.replace('MainStack') ; })
+			.then(response => { 
+				if(response.status == 200){
+					response.text().then(id => navigation.replace('MainStack', id));
+				}
+			})
 		}
 	}
 	checkAuth()
@@ -37,10 +40,10 @@ const SignInScreen = ({navigation}) => {
                     "password": password
                 })
         })
-        .then((response) => {
+        .then(response => {
             if (response.status == 200){
-				response.text().then(data => {
-					AsyncStorage.setItem('LOGIN_TOKEN', data, () => navigation.replace('MainStack'))
+				response.json().then(data => {
+					AsyncStorage.setItem('LOGIN_TOKEN', data.token, () => { navigation.replace('MainStack', data.id)})
 				})
 			}
 			else if(response.status == 400){
@@ -53,7 +56,6 @@ const SignInScreen = ({navigation}) => {
         })
     }
     const onSignUpPressed = () => {
-        console.warn("Register");
         navigation.navigate('Register');
     }
 
@@ -66,7 +68,7 @@ const SignInScreen = ({navigation}) => {
 
 				<CustomButton text= "Sign in" onPress={onSignPress}></CustomButton>
 				<CustomButton text= "Don't have an account? Create one!" onPress={onSignUpPressed}></CustomButton>
-				<View style={styles.box1}></View>
+				<View></View>
         	</View>
         </ScrollView>
     );

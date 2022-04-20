@@ -1,4 +1,5 @@
 import React, {useState} from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import {View, Text, Image, StyleSheet, useWindowDimensions, ScrollView} from "react-native";
 
 
@@ -30,14 +31,18 @@ const AddProperty = ({route}) => {
     
     const navigation = useNavigation();
     
-    const createOffer = () => {
-        
+    const createOffer = async () => {
+        const token = await AsyncStorage.getItem('LOGIN_TOKEN');
+		if(token == null)
+			navigation.replace('Login')
+
         if (type.length>0 && size.length>0 && price.length>0 && description.length>0 && rooms.length>0 && state.length>0 && 
             city.length>0 && street.length>0 && postalCode.length>0 && title.length>0 && text.length>0){
             fetch('http://10.0.2.2:8000/newPost',{
                 method: 'POST',
                 headers:{
-                    'Content-Type':'application/json'
+                    'Content-Type':'application/json',
+					'auth': token
                     },
                     body: JSON.stringify({
                         "type": type,

@@ -16,6 +16,7 @@ export default class Home extends React.Component{
             dataSource: null,
             users_id: this.props.route.params,
         }
+		this.componentDidMount()
     }
     
     componentDidMount(){  
@@ -32,6 +33,7 @@ export default class Home extends React.Component{
                     console.log(error);
                 });
     }
+
     giveLike = (user_id,property_id) => {
        fetch('http://10.0.2.2:8000/postLike',{
            method: 'POST',
@@ -68,53 +70,49 @@ export default class Home extends React.Component{
         
         this.props.navigation.navigate('Home',users_id);
     }
+
     render(){
-
         if(this.state.isLoading){
-            return (
-                <View style={styles.root}>
-                    <ActivityIndicator/>
-                </View>
-            )
+           return (<View style={styles.root}><ActivityIndicator/></View>)
         } 
-
         else {
-        
             let offer = this.state.dataSource.map((val,key)=> {
-                
-                return <View key={key} style={styles.root}>
-                            <Image 
-                                source={val.profile_picture_ref} 
-                                style={[styles.profile]} 
-                                resizeMode="contain" 
-                            />
-                            <Text>{val.name}{" "}{val.surname}{" "}{val.add_date.split(" ",4)+" "}</Text>
-                            <Text>{"Title: "+val.title}</Text>
-                            <Text>{"Description: "+val.text}</Text>
-                            <Text>{val.profile_picture_ref}</Text>
-                            
-                            <Image 
-                                source={Logo} 
-                                style={[styles.logo]} 
-                                resizeMode="contain" 
-                            />
-                             <CustomButton text= "Show detail" onPress={() => {
-                                this.schowDetail(val.property_id);
-                            }}>
-                                 </CustomButton>
-                            <CustomButton text= {val.like_status+" Likes"} onPress={()=>{
-                                this.giveLike(val.users_id,val.property_id)
-                                }}>  
-                                </CustomButton>
-                       </View>
+                return (
+					<View key={key} style={styles.root}>
+                    	<Image 
+                            source={val.profile_picture_ref} 
+                            style={[styles.profile]} 
+                            resizeMode="contain" 
+                        />
+                        <Text>{val.name}{" "}{val.surname}{" "}{val.add_date.split(" ",4)+" "}</Text>
+                        <Text>{"Title: "+val.title}</Text>
+                        <Text>{"Description: "+val.text}</Text>
+                        <Text>{val.profile_picture_ref}</Text>
+                        
+                        <Image 
+                            source={Logo} 
+                            style={[styles.logo]} 
+                            resizeMode="contain" 
+                        />
+                         <CustomButton text= "Show detail" onPress={() => {
+                            this.schowDetail(val.property_id);
+                        }}>
+                             </CustomButton>
+                        <CustomButton text= {val.like_status+" Likes"} onPress={()=>{
+                            this.giveLike(val.users_id,val.property_id)
+                            }}>  
+                            </CustomButton>
+                   	</View>
+				)
             })
        
             return(
-                <ScrollView>
+                <ScrollView style={{backgroundColor: '#444444'}}>
                     <View style={styles.text}>
                     <View style={{ flexDirection:"row" }}>
                         <View style={styles.buttonStyle}>
                                 <Button title="Profile" onPress={() => {
+								console.log(this.state.users_id);
                                 this.profile(this.state.users_id);
                             }}></Button>
                         </View>
@@ -122,7 +120,7 @@ export default class Home extends React.Component{
                             <Button title="Call"></Button>
                         </View>
                         <View style={styles.buttonStyle}>
-                            <Button title="Houses" oonPress={() => {
+                            <Button title="Houses" onPress={() => {
                                 this.housesOnly(this.state.users_id);
                             }}></Button>
                         </View>
@@ -181,7 +179,4 @@ const styles = StyleSheet.create({
         marginTop: 5
       },
 })
-
-
-
 

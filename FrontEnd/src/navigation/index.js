@@ -26,7 +26,7 @@ function Dashboard() {
 					tabBarShowLabel: false,
 					tabBarStyle: { backgroundColor: '#161615' }})}>
 			<Tab.Screen 
-				name="Feed" 
+				name="Home" 
 				component={Home}
 				options={{
 					tabBarIcon: ({size, color}) => ( <Icon name={"home"} color={color} size={size * 1.5} />),
