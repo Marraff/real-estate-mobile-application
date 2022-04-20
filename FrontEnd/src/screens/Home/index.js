@@ -72,26 +72,10 @@ export default class Home extends React.Component{
         .catch((error)=>{
         	console.log(error);
         });
-               
     }
+
     schowDetail = (property_id) => {
         this.props.navigation.navigate('DetailScreen',property_id);
-    }
-
-    profile = (id) => {
-        this.props.navigation.navigate('Profile',id);
-    }
-
-    housesOnly = () => {
-        this.props.navigation.navigate('Houses');
-    }
-		
-    flatsOnly = () => {
-        this.props.navigation.navigate('Flats');
-    }
-
-    all = () => {
-        this.props.navigation.navigate('Home');
     }
 
 	formatTime = (dur2) => {
@@ -145,10 +129,7 @@ export default class Home extends React.Component{
                     	    />
 						 </Pressable>
 						<View style={{alignItems: 'center', justifyContent: 'center'}}>
-                    	    <CustomButton text= {val.like_status + " Likes"} onPress={()=>{
-                    	        this.giveLike(val.property_id)
-                    	        }}>  
-                    	        </CustomButton>
+                    	    <CustomButton text= {val.like_status + " Likes"} onPress={()=>{this.giveLike(val.property_id)}}></CustomButton>
                    		</View>
                    	</View>
 				)
@@ -157,21 +138,8 @@ export default class Home extends React.Component{
             return(
                 <ScrollView style={{backgroundColor: '#444444'}}>
                     <View style={styles.text}>
-                    <View style={{ flexDirection:"row" }}>
-                        <View style={styles.buttonStyle}>
-                            <Button title="Houses" onPress={() => {
-                                this.housesOnly(this.state.users_id);
-                            }}></Button>
-                        </View>
-                        <View style={styles.buttonStyle}>
-                            <Button title="Flats"  onPress={() => {
-                                this.flatsOnly(this.state.users_id);
-                            }}></Button>
-                        </View>
-                    </View>
-                   
+                    <View style={{ flexDirection:"row" }}></View>
                     {offer}
-                    
                     </View>
                 </ScrollView>
                 );

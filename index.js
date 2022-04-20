@@ -91,8 +91,10 @@ app.get('/offers',  async(req,res) => {      //zobrazenie vsetkych ponuk nehnute
 
 //mam
 app.put('/myOffers', async(req,res) => {    //najdenie vsetkych inzeratov pouzivatela
-	//authenticateToken(req, res);
-    const user_id = req.body.user_id;
+	if(!authenticateToken(req, res))
+		return res.status(400).send("Invalid token")
+
+	const user_id = req.user_id;	
 	
 	try {
 		let query = "SELECT * FROM property INNER JOIN location ON property.location_id = location.id INNER JOIN posts " +
@@ -173,16 +175,17 @@ app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikac
 });
 
 app.put('/changePost', async(req, res) => {
-	//authenticateToken(req, res);
-	const {post_id, user_id, title, text} = req.body;
-	console.log(req.body)
+	if(!authenticateToken(req, res))
+		return res.status(400).send("Invalid token")
+
+	const user_id = req.user_id;	
+	const {post_id, title, text} = req.body;
     
     try {
 		let user_query = "SELECT users_id FROM posts WHERE id = ?";
 		let update_query = "UPDATE posts SET title = ?, text = ? WHERE id = ? ";
 
 		const user_result = await conn.query(user_query, [post_id]);
-
 
 		if(!user_result[0].users_id || user_result[0].users_id != user_id)
 		return res.send("You're not allowed to change this post");
@@ -198,10 +201,12 @@ app.put('/changePost', async(req, res) => {
 	}
 });
 
-//mam
 app.put('/changeProperty', async(req,res) => {      //zmenie udajov o nehnutelnosti
-	//authenticateToken(req, res);
-	const { type, size, price, description, rooms, user_id, property_id } = req.body;
+	if(!authenticateToken(req, res))
+		return res.status(400).send("Invalid token")
+
+	const user_id = req.user_id;	
+	const { type, size, price, description, rooms, property_id } = req.body;
 	let image = 0;
 
 	if(req.files && Object.keys(req.files).length !== 0 && allowedExtensions.exec(req.files.image_link.name)){
@@ -234,19 +239,24 @@ app.put('/changeProperty', async(req,res) => {      //zmenie udajov o nehnutelno
 	}
 });
 
-//mam
 app.delete('/delete', async(req,res) => {     // zmazanie danej nehnuteľnosti
-	//authenticateToken(req,res);
-	const { property_id, user_id } = req.body;
-    console.log(req.body)
+	if(!authenticateToken(req, res))
+		return res.status(400).send("Invalid token")
+
+    const user_id = req.user_id;
+	const { property_id } = req.body;
+
 	try{
 		let user_query = "SELECT users_id FROM property WHERE id = ?";
 		let del_query = "DELETE location, property, posts FROM posts INNER JOIN property ON posts.property_id = property.id" +
             			" INNER JOIN location ON location.id = property.location_id WHERE property.id = ? AND posts.users_id = ?"
 			
 		const user_result = await conn.query(user_query, [property_id]);
+		console.log(user_id)
+		console.log(user_result[0].users_id)
 		if(!user_result[0].users_id  || user_result[0].users_id != user_id)
-			return res.send("You're not allowed to delete this post");
+			return res.status(400).send("You're not allowed to delete this post");
+
 
 		const set_fk_0 = await conn.query("SET FOREIGN_KEY_CHECKS = 0");
 		const del_result = await conn.query(del_query, [property_id, user_id]);

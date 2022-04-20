@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {View, Text, Image, StyleSheet, useWindowDimensions, ScrollView} from "react-native";
-
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import Logo from "../../../assets/images/logo.png";
 import CustomInput from "../../components/customInput";
@@ -8,41 +8,31 @@ import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 
 
-
 const EditPost = ({route}) => {
-
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
-
-    const  user_id  = route.params.user_id;
-    const  post_id = route.params.post_id;
-
-    console.log(route.params)
-    
+    const post_id = route.params.post_id;
     const navigation = useNavigation();
     
-    const changePost = () => {
-        
+    const changePost = async () => {
         if (title.length>0 && text.length>0){
+			const token = await AsyncStorage.getItem('LOGIN_TOKEN');
             fetch('http://10.0.2.2:8000/changePost',{
                 method: 'PUT',
                 headers:{
-                    'Content-Type':'application/json'
+                    'Content-Type':'application/json',
+					'auth' : token,
                     },
                     body: JSON.stringify({
-                        
                         "title": title,
                         "text": text,
-
-                        "user_id": user_id,
                         "post_id": post_id
-
                     })
             })
             .then((response)=> {
                 if (response.status == 200 ){
                     console.log("Post changed in database");
-                    navigation.navigate('Profile',user_id);
+                    navigation.navigate('Profile');
                 }
             })
             .catch((error)=>{
@@ -52,27 +42,12 @@ const EditPost = ({route}) => {
     }
 
     return(
-        <ScrollView>
+        <ScrollView style={{backgroundColor: '#444444'}}>
             <View style={styles.root}>
-
                 <Text style={styles.title}> Change Post</Text>
-
-                <CustomInput 
-                    placeholder="title"
-                    value = {title}
-                    setValue = {setTitle}
-                    
-                />
-                 <CustomInput 
-                    placeholder="text"
-                    value = {text}
-                    setValue = {setText}
-                    
-                />
+                <CustomInput placeholder="title" value = {title} setValue = {setTitle} />
+                <CustomInput placeholder="text"  value = {text} setValue = {setText} />
                 <CustomButton text= "Change" onPress={changePost}></CustomButton>
-                
-                
-
             </View>
         </ScrollView>
     );
@@ -91,9 +66,11 @@ const styles = StyleSheet.create({
         maxHeight: 200,
     },
     title:{
-        fontSize: 25,
-        fontWeight: 'bold',
-        color: 'black' ,  
+		fontFamily: 'Roboto',
+    	fontSize: 25,
+    	padding: 20,
+    	fontWeight: 'bold',
+    	color: '#3B71F7' , 
      },
      text: {
         color: 'white' ,

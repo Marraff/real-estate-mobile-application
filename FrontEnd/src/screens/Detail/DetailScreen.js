@@ -7,7 +7,6 @@ import Logo from "../../../assets/images/logo.png";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 
-//const Home = () => {  
 export default class DetailScreen extends React.Component{
 
     constructor(props){
@@ -18,8 +17,6 @@ export default class DetailScreen extends React.Component{
             property_id: this.props.route.params,
         }
     }
-    
-    //componentDidMount(){  
     
     componentDidMount(){
         return fetch('http://10.0.2.2:8000/getData',{
@@ -59,30 +56,36 @@ export default class DetailScreen extends React.Component{
         
             let offer = this.state.dataSource.map((val,key)=> {
                 
-                return <View key={key} style={styles.root}>
-                            <Image 
-                                source={val.profile_picture_ref} 
-                                style={[styles.profile]} 
-                                resizeMode="contain" 
-                            />
-                            <Text>{"Type: "+val.type}</Text>
-                            <Text>{"Size: "+val.size+" m2"}</Text>
-                            <Text>{"Price: "+val.price}</Text>
-                            <Text>{"rooms: "+val.rooms}</Text>
-                            <Text>{"Description: "+val.description}</Text>
-                            <Text>{val.profile_picture_ref}</Text>
-                            
-                            <Image 
-                                source={Logo} 
-                                style={[styles.logo]} 
-                                resizeMode="contain" 
-                            />
-                            <CustomButton text= "Home page" onPress={onSignPress}></CustomButton>
-                       </View>
+                return (
+					<View key={key}>
+						<View>
+                        <Image 
+                            source={val.profile_picture_ref} 
+                            style={[styles.profile]} 
+                            resizeMode="contain" 
+                        />
+						</View>
+						<View style={styles.info}> 
+                        	<Text>{"Type: " + val.type}</Text>
+                        	<Text>{"Size: " + val.size+" m2"}</Text>
+                        	<Text>{"Price: " + val.price}</Text>
+                        	<Text>{"Rooms: " + val.rooms}</Text>
+                        	<Text>{"Description: " + val.description}</Text>
+                        	<Text>{val.profile_picture_ref}</Text>
+                       	</View> 
+						<View style={styles.root}>
+                        <Image 
+                            source={Logo} 
+                            style={[styles.logo]} 
+                            resizeMode="contain" 
+                        />
+						</View>
+                   </View>
+				)
             })
        
             return(
-                <ScrollView>
+                <ScrollView style={{backgroundColor: '#444444'}}>
                     <View style={styles.text}>
                     {offer}
                     </View>
@@ -97,9 +100,8 @@ const styles = StyleSheet.create({
     root: {
         alignItems: 'center',
         padding: 20,
-        backgroundColor: 'white',
+        backgroundColor: '#4444444',
         borderRadius: 5,
-
     },
     logo: {
         maxWidth: 380,
@@ -121,4 +123,10 @@ const styles = StyleSheet.create({
         width: '15%',
         maxHeight: 30,
      },
+	 info: {
+		fontSize: 30,
+		textAlign: 'left',
+		padding: 20,
+        fontWeight: 'bold',
+	},
 })
