@@ -10,27 +10,19 @@ import { useNavigation } from "@react-navigation/native";
 
 
 
-const AddProperty = ({route}) => {
-
+const AddProperty = ({navigation}) => {
     const [type, setTyte] = useState('');
     const [size, setSize] = useState();
     const [price, setPrice] = useState('');
     const [description, setDescription] = useState('');
     const [rooms, setRooms] = useState('');
-    //const [user_id, setUser_id] = useState('');
-
     const [state, setState] = useState('');
     const [city, setCity] = useState('');
     const [street, setStreet] = useState('');
     const [postalCode, setPostalCode] = useState('');
-
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
 
-    const  user_id  = route.params.user_id;
-    
-    const navigation = useNavigation();
-    
     const createOffer = async () => {
         const token = await AsyncStorage.getItem('LOGIN_TOKEN');
 		if(token == null)
@@ -56,15 +48,12 @@ const AddProperty = ({route}) => {
                         "postal_code": postalCode,
                         "title": title,
                         "text": text,
-
-                        "user_id": user_id
-
                     })
             })
             .then((response)=> {
                 if (response.status == 200 ){
                     console.log("Offer added to database");
-                    navigation.navigate('Profile',user_id);
+                    navigation.navigate('Profile');
                 }
             })
             .catch((error)=>{
@@ -76,73 +65,19 @@ const AddProperty = ({route}) => {
     return(
         <ScrollView>
             <View style={styles.root}>
-
                 <Text style={styles.title}> Create Offer</Text>
-
-                <CustomInput 
-                    placeholder="type"
-                    value = {type}
-                    setValue = {setTyte}
-                />
-                <CustomInput 
-                    placeholder="size"
-                    value = {size}
-                    setValue = {setSize}
-                />
-                <CustomInput 
-                    placeholder="price"
-                    value = {price}
-                    setValue = {setPrice}
-                />
-                <CustomInput 
-                    placeholder="description"
-                    value = {description}
-                    setValue = {setDescription}
-                />
-                <CustomInput 
-                    placeholder="rooms"
-                    value = {rooms}
-                    setValue = {setRooms}
-                    
-                />
-                <CustomInput 
-                    placeholder="state"
-                    value = {state}
-                    setValue = {setState}
-                   
-                />
-                <CustomInput 
-                    placeholder="city"
-                    value = {city}
-                    setValue = {setCity}
-                />
-                <CustomInput 
-                    placeholder="street"
-                    value = {street}
-                    setValue = {setStreet}
-                />
-                <CustomInput 
-                    placeholder="postal code"
-                    value = {postalCode}
-                    setValue = {setPostalCode}
-                   
-                />
-                <CustomInput 
-                    placeholder="title"
-                    value = {title}
-                    setValue = {setTitle}
-                    
-                />
-                 <CustomInput 
-                    placeholder="text"
-                    value = {text}
-                    setValue = {setText}
-                    
-                />
+                <CustomInput placeholder="type" value = {type} setValue = {setTyte}/>
+                <CustomInput placeholder="size" value = {size} setValue = {setSize}/>
+                <CustomInput placeholder="price" value = {price} setValue = {setPrice}/>
+                <CustomInput placeholder="description" value = {description} setValue = {setDescription}/>
+                <CustomInput placeholder="rooms" value = {rooms} setValue = {setRooms}/>
+                <CustomInput placeholder="state" value = {state} setValue = {setState}/>
+                <CustomInput placeholder="city" value = {city} setValue = {setCity}/>
+                <CustomInput placeholder="street" value = {street} setValue = {setStreet}/>
+                <CustomInput placeholder="postal code" value = {postalCode} setValue = {setPostalCode}/>
+                <CustomInput placeholder="title" value = {title} setValue = {setTitle}/>
+                <CustomInput placeholder="text" value = {text} setValue = {setText}/>
                 <CustomButton text= "Create" onPress={createOffer}></CustomButton>
-                
-                
-
             </View>
         </ScrollView>
     );
@@ -161,9 +96,11 @@ const styles = StyleSheet.create({
         maxHeight: 200,
     },
     title:{
+		fontFamily: 'Roboto',
         fontSize: 25,
+        padding: 20,
         fontWeight: 'bold',
-        color: 'black' ,  
+        color: '#3B71F7' ,
      },
      text: {
         color: 'white' ,

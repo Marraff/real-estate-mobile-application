@@ -1,5 +1,6 @@
 import React from "react";
-import {View, Text, ScrollView, StyleSheet, ActivityIndicator,Image, useWindowDimensions, Button} from "react-native";
+import {Pressable, View, Text, ScrollView, StyleSheet, ActivityIndicator,Image, useWindowDimensions, Button} from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import Axios from "axios"
 import {useState, useEffect} from "react"
 import { render } from "express/lib/response";
@@ -12,64 +13,112 @@ export default class Home extends React.Component{
     constructor(props){
         super(props);
         this.state = {
+			current : 0,
             isLoading: true,
             dataSource: null,
-            users_id: this.props.route.params,
         }
-		this.componentDidMount()
     }
     
     componentDidMount(){  
         return fetch('http://10.0.2.2:8000/offers')
-                .then((response) => response.json())
-                .then((resposneJson) => {
-                    this.setState({
-                        isLoading: false,
-                        dataSource: resposneJson,
-                    })
-                    //console.log(resposneJson)
-                })
-                .catch((error)=>{
-                    console.log(error);
-                });
-    }
-
-    giveLike = (user_id,property_id) => {
-       fetch('http://10.0.2.2:8000/postLike',{
-           method: 'POST',
-           headers:{
-               'Content-Type':'application/json'
-               },
-               body: JSON.stringify({"user_id": user_id, "property_id": property_id})
-       })
-               .then((res) => {
-                   console.log(res.status)
+               .then((response) => response.json())
+               .then((resposneJson) => {
+                   this.setState({
+                       isLoading: false,
+                       dataSource: resposneJson,
+                   })
                })
                .catch((error)=>{
                    console.log(error);
                });
+    }
+	
+	componentDidUpdate(){
+        return fetch('http://10.0.2.2:8000/offers')
+               .then((response) => response.json())
+               .then((resposneJson) => {
+                   this.setState({
+                       isLoading: false,
+                       dataSource: resposneJson,
+                   })
+               })
+               .catch((error)=>{
+                   console.log(error);
+               });
+    }
+
+
+    giveLike = async (property_id) => {
+		const token = await AsyncStorage.getItem('LOGIN_TOKEN');
+		if(token == null)
+			navigator.replace("Login");
+
+       	fetch('http://10.0.2.2:8000/postLike',{
+       	    method: 'POST',
+       		headers:{
+       	        'Content-Type':'application/json',
+				'auth' : token
+            },
+          	body: JSON.stringify({"property_id": property_id})
+       	})
+        .then((res) => {
+			this.setState((prevState, props) => ({
+				current: prevState.current + 1
+			}));
+			console.log(token)
+        	console.log(res.status)
+			res.text().then(x => console.log(x))
+       	})
+        .catch((error)=>{
+        	console.log(error);
+        });
                
     }
     schowDetail = (property_id) => {
-        
         this.props.navigation.navigate('DetailScreen',property_id);
     }
+
     profile = (id) => {
-           
         this.props.navigation.navigate('Profile',id);
     }
-    housesOnly = (users_id) => {
-            
-        this.props.navigation.navigate('Houses',users_id);
+
+    housesOnly = () => {
+        this.props.navigation.navigate('Houses');
     }
-    flatsOnly = (users_id) => {
-        
-        this.props.navigation.navigate('Flats',users_id);
+		
+    flatsOnly = () => {
+        this.props.navigation.navigate('Flats');
     }
-    all = (users_id) => {
-        
-        this.props.navigation.navigate('Home',users_id);
+
+    all = () => {
+        this.props.navigation.navigate('Home');
     }
+
+	formatTime = (dur2) => {
+		let diff = Math.abs(new Date().getTime() - new Date(dur2).getTime()) / 1000;
+		let hours = Math.floor(diff / 3600)
+		let minutes = Math.floor((diff % 3600) / 60)
+		let seconds = Math.floor(diff % 60)
+		if(hours >= 24 * 365){
+			let years = Math.floor(hours / (365 * 24))
+			return years.toString() + (years == 1 ? " year ago" : " years ago")
+		}
+		if(hours >= 24 * 30){
+			let months = Math.floor(hours/ (30 * 24))
+			return months.toString() + (months == 1 ? " month ago" : " months ago")
+		}
+		if(hours >= 24){
+			let days = Math.floor(hours / 24)
+			return days.toString() + (days == 1 ? " day ago" : " days ago")
+		}
+
+		if(hours < 24)
+			return hours.toString() + (hours == 1 ? " hour ago" : " hours ago")
+		if(minutes < 60)
+			return minutes.toString() + (minutes == 1 ? " minute ago" : " minutes ago")
+		if(seconds < 60)
+			return seconds.toString() + (seconds == 1 ? " second ago" : " seconds ago")
+	}
 
     render(){
         if(this.state.isLoading){
@@ -78,30 +127,29 @@ export default class Home extends React.Component{
         else {
             let offer = this.state.dataSource.map((val,key)=> {
                 return (
-					<View key={key} style={styles.root}>
-                    	<Image 
-                            source={val.profile_picture_ref} 
-                            style={[styles.profile]} 
-                            resizeMode="contain" 
-                        />
-                        <Text>{val.name}{" "}{val.surname}{" "}{val.add_date.split(" ",4)+" "}</Text>
-                        <Text>{"Title: "+val.title}</Text>
-                        <Text>{"Description: "+val.text}</Text>
-                        <Text>{val.profile_picture_ref}</Text>
-                        
-                        <Image 
-                            source={Logo} 
-                            style={[styles.logo]} 
-                            resizeMode="contain" 
-                        />
-                         <CustomButton text= "Show detail" onPress={() => {
-                            this.schowDetail(val.property_id);
-                        }}>
-                             </CustomButton>
-                        <CustomButton text= {val.like_status+" Likes"} onPress={()=>{
-                            this.giveLike(val.users_id,val.property_id)
-                            }}>  
-                            </CustomButton>
+					<View key={key} style={styles.root} >
+						<View >
+                    		<Image 
+                    	        source={val.profile_picture_ref} 
+                    	        style={[styles.profile]} 
+                    	        resizeMode="contain" 
+                    	    />
+                    	    <Text>{"Posted by " + val.name}{" "}{val.surname}{" "}{this.formatTime(val.add_date)}</Text>
+                    	    <Text style={styles.post_title}>{val.title}</Text>
+                    	 </View>
+						 <Pressable onPress = {() => this.schowDetail(val.property_id)} style={{alignItems: 'center', justifyContent: 'center'}}>
+                    	    <Image 
+                    	        source={Logo} 
+                    	        style={[styles.logo]} 
+                    	        resizeMode="contain" 
+                    	    />
+						 </Pressable>
+						<View style={{alignItems: 'center', justifyContent: 'center'}}>
+                    	    <CustomButton text= {val.like_status + " Likes"} onPress={()=>{
+                    	        this.giveLike(val.property_id)
+                    	        }}>  
+                    	        </CustomButton>
+                   		</View>
                    	</View>
 				)
             })
@@ -111,15 +159,6 @@ export default class Home extends React.Component{
                     <View style={styles.text}>
                     <View style={{ flexDirection:"row" }}>
                         <View style={styles.buttonStyle}>
-                                <Button title="Profile" onPress={() => {
-								console.log(this.state.users_id);
-                                this.profile(this.state.users_id);
-                            }}></Button>
-                        </View>
-                        <View style={styles.buttonStyle}>
-                            <Button title="Call"></Button>
-                        </View>
-                        <View style={styles.buttonStyle}>
                             <Button title="Houses" onPress={() => {
                                 this.housesOnly(this.state.users_id);
                             }}></Button>
@@ -127,11 +166,6 @@ export default class Home extends React.Component{
                         <View style={styles.buttonStyle}>
                             <Button title="Flats"  onPress={() => {
                                 this.flatsOnly(this.state.users_id);
-                            }}></Button>
-                        </View>
-                        <View style={styles.buttonStyle}>
-                            <Button title="All offers" onPress={() => {
-                                this.all(this.state.users_id);
                             }}></Button>
                         </View>
                     </View>
@@ -148,9 +182,9 @@ export default class Home extends React.Component{
 
 const styles = StyleSheet.create({
     root: {
-        alignItems: 'center',
+		alignText: 'left',
         padding: 20,
-        backgroundColor: 'white',
+        backgroundColor: '#444444',
         borderRadius: 5,
 
     },
@@ -158,7 +192,6 @@ const styles = StyleSheet.create({
         maxWidth: 380,
         width: '70%',
         maxHeight: 200,
-        
     },
     title:{
         fontSize: 25,
@@ -176,7 +209,13 @@ const styles = StyleSheet.create({
      },
      buttonStyle: {
         marginHorizontal: 2,
-        marginTop: 5
-      },
+        marginTop: 5,
+     },
+	 post_title: {
+		textAlign: 'left',
+		fontSize: 20,
+		fontWeight: 'bold',
+		color: '#3B71F7',
+	 },
 })
 

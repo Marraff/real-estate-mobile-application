@@ -33,7 +33,9 @@ function Dashboard() {
 				}}
 			/>
 					
-			<Tab.Screen name="Profile" component={Profile}/>
+			<Tab.Screen name="AddProperty" component={AddProperty} options={{tabBarIcon: ({size, color}) => ( <Icon name={"plus"} color={color} size={size * 1.5}/>),}}/>
+			<Tab.Screen name="Profile" component={Profile} options={{tabBarIcon: ({size, color}) => ( <Icon name={"baby-face"} color={color} size={size * 1.5}/>),}}/>
+			<Tab.Screen name="Call" component={Dashboard} options={{tabBarIcon: ({size, color}) => ( <Icon name={"phone"} color={color} size={size * 1.5}/>),}}/>
 		</Tab.Navigator>
 	);
 }
@@ -54,7 +56,6 @@ function MainStack() {
             <Stack.Screen name="DetailScreen" component={DetailScreen}/>
             <Stack.Screen name="Houses" component={Houses}/>
             <Stack.Screen name="Flats" component={Flats}/>
-            <Stack.Screen name="AddProperty" component={AddProperty}/>
             <Stack.Screen name="EditPost" component={EditPost}/>
             <Stack.Screen name="EditProperty" component={EditProperty}/>
 		</Stack.Navigator>

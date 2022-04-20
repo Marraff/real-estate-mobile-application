@@ -47,6 +47,9 @@ function generateAccessToken(id){
 function authenticateToken(req, res) {
 	const { headers: { auth } } = req
 	let token = auth
+	if(typeof token === 'undefined' || token == null)
+		return false;
+
  	const result = jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
  		if(err || !decoded){
 			console.log(err)
@@ -55,7 +58,6 @@ function authenticateToken(req, res) {
 		req.user_id = decoded.id;
 	})
 	return true;
-	return 4;
 }
 
 function hash(string){
@@ -77,7 +79,7 @@ app.get('/', async(req,res) => {
 app.get('/offers',  async(req,res) => {      //zobrazenie vsetkych ponuk nehnutelnosti
 	//authenticateToken(req, res);
 	try {
-		let query = "SELECT * FROM posts INNER JOIN users ON posts.users_id = users.id"
+		let query = "SELECT * FROM posts INNER JOIN users ON posts.users_id = users.id ORDER BY posts.like_status DESC"
 		const result = await conn.query(query);
 		return res.status(200).json(result);
 		//res.send(result).status(200)
@@ -128,10 +130,14 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 			return res.status(400).send("Unable to load image");
 		}
     } 
+	else{
+		profile_picture.name = 'UnknownProfile.jpg';
+		profile_picture.mv(__dirname + 'FrontEnd/assets/upload' + profile.picture.name);
+	}
     
 	try {
         let query = "INSERT INTO users (name, surname, email, telephone, profile_picture_ref, auth) VALUES (?,?,?,?,?,?)"
-		const result = await conn.query(query,[name, surname, email, telephone, profile_picture.name, auth]);
+		const result = await conn.query(query,[name, surname, email, telephone, profile_picture.mv, auth]);
 		return res.status(200).send("User " + name + " was created");
 
 	} catch (err) {
@@ -289,8 +295,11 @@ app.post('/addComment', async(req,res) => {       //pridanie komentára
 
 //mam
 app.post('/postLike', async(req,res) => {       //pridanie liku na post
-	authenticateToken(req, res);
-    const user_id = req.body.user_id;
+	if(!authenticateToken(req, res))
+		return res.status(400).send("Invalid token")
+
+	const user_id = req.user_id;	
+	console.log(user_id)
 	const property_id = req.body.property_id;
 
 	try {
@@ -321,7 +330,7 @@ app.post('/commentLike', async(req,res) => {       //pridanie liku na koment
 //mam
 app.put('/getByType', async(req, res) => {
 	//authenticateToken(req, res);
-	console.log("som tu")
+	//console.log("som tu")
 	const type = req.body.type;	
 	
 	try {
@@ -392,7 +401,7 @@ app.post('/newPost', async(req,res) => {
 	const { state, city, street, postal_code } = req.body;
 	const { title, text } = req.body;
 	let image = 0, location_id, property_id;
-	let like_status = 0, comments_status = 0, add_date = new Date().toJSON().slice(0, 10);
+	let like_status = 0, comments_status = 0, add_date = new Date().toISOString().slice(0,19).replace('T',' ');
 
 	if(req.files && Object.keys(req.files).length !== 0 && allowedExtensions.exec(req.files.image_link.name)){
 		try {
