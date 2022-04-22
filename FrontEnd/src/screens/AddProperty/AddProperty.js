@@ -7,7 +7,7 @@ import Logo from "../../../assets/images/logo.png";
 import CustomInput from "../../components/customInput";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
-
+import {launchCamera, launchImageLibrary} from "react-native-image-picker";
 
 
 const AddProperty = ({navigation}) => {
@@ -57,6 +57,44 @@ const AddProperty = ({navigation}) => {
     	});
   	};	
 	*/
+    const options = {
+        title: 'Select Image',
+        type: 'library',
+        options: {
+            maxHeight: 200,
+            maxWidth: 200,
+            selectionLimit: 1,
+            mediaType: 'photo',
+            includeBase64: false,
+        },
+    }
+    
+    const chooseFile = async () => {
+        const images = await launchImageLibrary(options);
+        console.log(images.assets[0]);
+        const formData = new FormData()
+        formData.append('file', {
+            uri: images.assets[0].uri,
+            type: images.assets[0].type,
+            name: images.assets[0].fileName
+        })
+        formData.append('body', {
+            type: type,
+            size: parseInt(size),
+            price: price ,
+            escription: description,
+            rooms: rooms,
+            state: state,
+            city: city,
+            street: street,
+            postal_code: postalCode,
+            title: title,
+            text: text,
+        })
+        console.log(formData)
+        
+    }
+
     const createOffer = async () => {
         const token = await AsyncStorage.getItem('LOGIN_TOKEN');
 		if(token == null)
@@ -67,7 +105,8 @@ const AddProperty = ({navigation}) => {
             fetch('http://10.0.2.2:8000/newPost',{
                 method: 'POST',
                 headers:{
-                    'Content-Type':'application/json',
+                    //'Content-Type':'application/json',
+                    'Content-Type':'multipart/form-data',
 					'auth': token
                     },
                     body: JSON.stringify({
