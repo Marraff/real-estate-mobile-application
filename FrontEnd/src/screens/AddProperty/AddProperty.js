@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {View, Text, Image, StyleSheet, useWindowDimensions, ScrollView} from "react-native";
-
+//import { launchImageLibrary } from 'react-native-image-picker';
 
 import Logo from "../../../assets/images/logo.png";
 import CustomInput from "../../components/customInput";
@@ -22,7 +22,41 @@ const AddProperty = ({navigation}) => {
     const [postalCode, setPostalCode] = useState('');
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
+	/*
+	 * IMAGE FUNCTIONS - Don't work
+	const [filePath, setFilepath] = useState({});
 
+	const requestExternalWritePermission = async () => {
+    	if (Platform.OS === 'android') {
+    	  try {
+    	    const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+    	      {title: 'External Storage Write Permission',message: 'App needs write permission',},);
+    	    return granted === PermissionsAndroid.RESULTS.GRANTED;
+    	  } catch (err) {
+    	    console.warn(err);
+    	    alert('Write permission err', err);
+    	  }
+    	  return false;
+    	} 
+		else return true;
+  	};
+
+	const chooseFile = () => {
+    	let options = { mediaType: 'photo', maxWidth: 300, maxHeight: 550, quality: 1,};
+    	launchImageLibrary(options, (response) => {
+    	  console.log('Response = ', response);
+    	  if (response.didCancel) {
+    	    alert('User cancelled camera picker');
+    	    return;
+    	  } else if (response.errorCode == 'permission') {
+    	    alert('Permission not satisfied');
+    	    return;
+		  }
+    	  console.log('fileName -> ', response.fileName);
+    	  setFilePath(response);
+    	});
+  	};	
+	*/
     const createOffer = async () => {
         const token = await AsyncStorage.getItem('LOGIN_TOKEN');
 		if(token == null)
@@ -77,6 +111,7 @@ const AddProperty = ({navigation}) => {
                 <CustomInput placeholder="postal code" value = {postalCode} setValue = {setPostalCode}/>
                 <CustomInput placeholder="title" value = {title} setValue = {setTitle}/>
                 <CustomInput placeholder="text" value = {text} setValue = {setText}/>
+                <CustomButton text= "Choose Image" onPress={chooseFile}></CustomButton>
                 <CustomButton text= "Create" onPress={createOffer}></CustomButton>
             </View>
         </ScrollView>
