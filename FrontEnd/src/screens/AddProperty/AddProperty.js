@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import {View, Text, Image, StyleSheet, useWindowDimensions, ScrollView} from "react-native";
+import {View, Text, Image, StyleSheet, useWindowDimensions, ScrollView, form} from "react-native";
 //import { launchImageLibrary } from 'react-native-image-picker';
 
 import Logo from "../../../assets/images/logo.png";
@@ -22,6 +22,8 @@ const AddProperty = ({navigation}) => {
     const [postalCode, setPostalCode] = useState('');
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
+
+    
 	/*
 	 * IMAGE FUNCTIONS - Don't work
 	const [filePath, setFilepath] = useState({});
@@ -68,31 +70,17 @@ const AddProperty = ({navigation}) => {
             includeBase64: false,
         },
     }
-    
+    const formData = new FormData([form])
     const chooseFile = async () => {
         const images = await launchImageLibrary(options);
         console.log(images.assets[0]);
-        const formData = new FormData()
+        
         formData.append('file', {
             uri: images.assets[0].uri,
             type: images.assets[0].type,
             name: images.assets[0].fileName
         })
-        formData.append('body', {
-            type: type,
-            size: parseInt(size),
-            price: price ,
-            escription: description,
-            rooms: rooms,
-            state: state,
-            city: city,
-            street: street,
-            postal_code: postalCode,
-            title: title,
-            text: text,
-        })
-        console.log(formData)
-        
+       
     }
 
     const createOffer = async () => {
@@ -100,13 +88,34 @@ const AddProperty = ({navigation}) => {
 		if(token == null)
 			navigation.replace('Login')
 
+        const data = JSON.stringify({
+            "type": type,
+            "size": parseInt(size),
+            "price": price ,
+            "description": description,
+            "rooms": rooms,
+            "state": state,
+            "city": city,
+            "street": street,
+            "postal_code": postalCode,
+            "title": title,
+            "text": text,
+            })
+       
+        formData.append('data',data)
+
         if (type.length>0 && size.length>0 && price.length>0 && description.length>0 && rooms.length>0 && state.length>0 && 
             city.length>0 && street.length>0 && postalCode.length>0 && title.length>0 && text.length>0){
             fetch('http://10.0.2.2:8000/newPost',{
                 method: 'POST',
                 headers:{
-                    //'Content-Type':'application/json',
+                    Accept: 'application/json',
                     'Content-Type':'multipart/form-data',
+                    'auth': token
+                    },
+                    body: formData
+                    /*
+                    'Content-Type':'application/json',                   
 					'auth': token
                     },
                     body: JSON.stringify({
@@ -122,6 +131,7 @@ const AddProperty = ({navigation}) => {
                         "title": title,
                         "text": text,
                     })
+                    */
             })
             .then((response)=> {
                 if (response.status == 200 ){

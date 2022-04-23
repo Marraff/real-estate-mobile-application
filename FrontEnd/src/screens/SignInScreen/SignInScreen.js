@@ -7,7 +7,8 @@ import CustomInput from "../../components/customInput";
 import CustomButton from "../../components/CustomButton";
 
 const SignInScreen = ({navigation}) => {
-	const checkAuth = async () => {
+/*
+    const checkAuth = async () => {
 		const token = await AsyncStorage.getItem('LOGIN_TOKEN');
 		if(token !== null){
 			fetch('http://10.0.2.2:8000/logCheck', {
@@ -25,7 +26,7 @@ const SignInScreen = ({navigation}) => {
 		}
 	}
 	checkAuth()
-
+*/
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const {height} = useWindowDimensions();

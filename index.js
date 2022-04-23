@@ -404,20 +404,27 @@ async function check(req, res, post_id){
 app.post('/newPost', async(req,res) => {
 	if(!authenticateToken(req, res))
 		return res.status(400).send("Invalid token")
+	
+	console.log(req.body.data)
+	const data = JSON.parse(req.body.data)
 
 	const user_id = req.user_id;	
-	console.log(req.body)
-	const { type, size, price, description, rooms } = req.body;
-	const { state, city, street, postal_code } = req.body;
-	const { title, text } = req.body;
-	let image = 0, location_id, property_id;
+	const { type, size, price, description, rooms } = data;
+	const { state, city, street, postal_code } = data;
+	const { title, text } = data;
+	
+	let image = 0, location_id, property_id, image_path;
 	let like_status = 0, comments_status = 0, add_date = new Date().toISOString().slice(0,19).replace('T',' ');
 
-	if(req.files && Object.keys(req.files).length !== 0 && allowedExtensions.exec(req.files.image_link.name)){
+	if(req.files && Object.keys(req.files).length !== 0 && allowedExtensions.exec(req.files.file.name)){
 		try {
-			image = req.files.image_link;
+			image = req.files.file;
 			image.name = crypto.randomBytes(20).toString('hex') + '.jpg'
-			image.mv(__dirname + '/upload/' + image.name);
+			//image.mv(__dirname + '/upload/' + image.name);
+
+			image.mv(__dirname + "/FrontEnd/assets/upload/" + image.name);
+			//image_path = __dirname + "\\FrontEnd\\assets\\upload\\" + image.name
+
 		} catch (err) {
 			console.log(err);
 			return res.status(400).send("Unable to load image");
@@ -447,5 +454,6 @@ app.post('/newPost', async(req,res) => {
 		
 		return res.status(400).send(errMsg);
 	}
+	
 });
 

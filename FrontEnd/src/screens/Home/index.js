@@ -47,7 +47,6 @@ export default class Home extends React.Component{
                });
     }
 
-
     giveLike = async (property_id) => {
 		const token = await AsyncStorage.getItem('LOGIN_TOKEN');
 		if(token == null)
@@ -105,6 +104,9 @@ export default class Home extends React.Component{
 	}
 
     render(){
+
+       
+
         if(this.state.isLoading){
            return (<View style={styles.root}><ActivityIndicator/></View>)
         } 
@@ -123,7 +125,7 @@ export default class Home extends React.Component{
                     	 </View>
 						 <Pressable onPress = {() => this.schowDetail(val.property_id)} style={{alignItems: 'center', justifyContent: 'center'}}>
                     	    <Image 
-                    	        source={Logo} 
+                    	        source={require('../../../assets/upload/6c8f07fb1bcb8b6d80507564a4de74710b4d9e3c.jpg')} 
                     	        style={[styles.logo]} 
                     	        resizeMode="contain" 
                     	    />
