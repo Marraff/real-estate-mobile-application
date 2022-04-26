@@ -6,6 +6,7 @@ import Logo from "../../../assets/images/logo.png";
 import CustomInput from "../../components/customInput";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
+import IpAddress from "../../components/IpAddress";
 
 
 const EditProperty = ({route}) => {
@@ -20,7 +21,7 @@ const EditProperty = ({route}) => {
     const changeProperty = async () => {
         if (type.length>0 && size.length>0 && price.length>0 && description.length>0 && rooms.length>0){
 			const token = await AsyncStorage.getItem('LOGIN_TOKEN')
-            fetch('http://10.0.2.2:8000/changeProperty',{
+            fetch(`http://${IpAddress}:8000/changeProperty`,{
                 method: 'PUT',
                 headers:{
                     'Content-Type':'application/json',

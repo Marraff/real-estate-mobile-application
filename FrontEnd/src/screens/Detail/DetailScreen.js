@@ -6,6 +6,7 @@ import { render } from "express/lib/response";
 import Logo from "../../../assets/images/logo.png";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
+import IpAddress from "../../components/IpAddress";
 
 export default class DetailScreen extends React.Component{
 
@@ -19,7 +20,7 @@ export default class DetailScreen extends React.Component{
     }
     
     componentDidMount(){
-        return fetch('http://10.0.2.2:8000/getData',{
+        return fetch(`http://${IpAddress}:8000/getData`,{
             method: 'PUT',
             headers:{
                 'Content-Type':'application/json'

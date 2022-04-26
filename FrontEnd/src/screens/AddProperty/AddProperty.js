@@ -8,6 +8,7 @@ import CustomInput from "../../components/customInput";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 import {launchCamera, launchImageLibrary} from "react-native-image-picker";
+import IpAddress from "../../components/IpAddress";
 
 
 const AddProperty = ({navigation}) => {
@@ -75,11 +76,16 @@ const AddProperty = ({navigation}) => {
         const images = await launchImageLibrary(options);
         console.log(images.assets[0]);
         
+       
+       // formData.shift();
+       // formData.shift();
         formData.append('file', {
             uri: images.assets[0].uri,
             type: images.assets[0].type,
             name: images.assets[0].fileName
         })
+    
+      
        
     }
 
@@ -106,7 +112,7 @@ const AddProperty = ({navigation}) => {
 
         if (type.length>0 && size.length>0 && price.length>0 && description.length>0 && rooms.length>0 && state.length>0 && 
             city.length>0 && street.length>0 && postalCode.length>0 && title.length>0 && text.length>0){
-            fetch('http://10.0.2.2:8000/newPost',{
+            fetch(`http://${IpAddress}:8000/newPost`,{
                 method: 'POST',
                 headers:{
                     Accept: 'application/json',

@@ -7,6 +7,7 @@ import { render } from "express/lib/response";
 import Logo from "../../../assets/images/logo.png";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
+import IpAddress from "../../components/IpAddress";
 
 export default class Profile extends React.Component{
 
@@ -22,7 +23,7 @@ export default class Profile extends React.Component{
     componentDidMount(){  
 		const mount = async() => {
 			const token = await AsyncStorage.getItem('LOGIN_TOKEN');
-       		return fetch('http://10.0.2.2:8000/myOffers',{
+       		return fetch(`http://${IpAddress}:8000/myOffers`,{
        		    method: 'PUT',
        		    headers:{
        		        'Content-Type':'application/json',
@@ -46,7 +47,7 @@ export default class Profile extends React.Component{
     componentDidUpdate(){  
 		const mount = async() => {
 			const token = await AsyncStorage.getItem('LOGIN_TOKEN');
-       		return fetch('http://10.0.2.2:8000/myOffers',{
+       		return fetch(`http://${IpAddress}:8000/myOffers`,{
        		    method: 'PUT',
        		    headers:{
        		        'Content-Type':'application/json',
@@ -79,7 +80,7 @@ export default class Profile extends React.Component{
 
     deleteProperty = async (property_id) => {
 		const token = await AsyncStorage.getItem('LOGIN_TOKEN')
-        fetch('http://10.0.2.2:8000/delete',{
+        fetch(`http://${IpAddress}:8000/delete`,{
             method: 'DELETE',
             headers:{
                 'Content-Type':'application/json',
@@ -98,6 +99,7 @@ export default class Profile extends React.Component{
     }
 
     editPost = (post_id) => {
+        console.log(post_id)
         this.props.navigation.navigate('EditPost',{post_id: post_id});
     }
 
@@ -137,7 +139,7 @@ export default class Profile extends React.Component{
                          </View>
                          <View style={styles.buttonStyle}>
                             <Button title= "Edit post" onPress={() => {
-                                this.editPost(val.id);
+                                this.editPost(val.post_id);
                                 }}>
                             </Button>
                          </View>

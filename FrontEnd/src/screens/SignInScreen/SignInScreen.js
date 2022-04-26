@@ -5,13 +5,15 @@ import { View, Text, Image, StyleSheet, useWindowDimensions, useEffect, ScrollVi
 import Logo from "../../../assets/images/logo_name.png";
 import CustomInput from "../../components/customInput";
 import CustomButton from "../../components/CustomButton";
+import IpAddress from "../../components/IpAddress";
+
 
 const SignInScreen = ({navigation}) => {
 /*
     const checkAuth = async () => {
 		const token = await AsyncStorage.getItem('LOGIN_TOKEN');
 		if(token !== null){
-			fetch('http://10.0.2.2:8000/logCheck', {
+			fetch('http://${IpAddress}:8000/logCheck/', {
 				method: 'PUT',
 				headers: {
 					'Content-Type':'application/json',
@@ -31,7 +33,9 @@ const SignInScreen = ({navigation}) => {
     const [password, setPassword] = useState('');
     const {height} = useWindowDimensions();
     const onSignPress = () => {
-        fetch('http://10.0.2.2:8000/login',{
+       
+        console.log(IpAddress)
+        fetch(`http://${IpAddress}:8000/login/`,{
             method: 'PUT',
             headers:{
                 'Content-Type':'application/json'
@@ -55,6 +59,7 @@ const SignInScreen = ({navigation}) => {
             console.log(error);
 
         })
+        
     }
     const onSignUpPressed = () => {
         navigation.navigate('Register');

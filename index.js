@@ -7,13 +7,15 @@ const jwt = require('jsonwebtoken');
 const fileUpload = require('express-fileupload'); //Win version: .. require('express-fileUpload');
 require('dotenv').config()
 
-let http = require('http');
+//let http = require('http');
 let crypto = require("crypto");
+const res = require('express/lib/response');
 let conn = db();
 let allowedExtensions = /(\.jpg)$/i;
 const errMsg = "Oops something went wrong!"
 const salt = "MTAA je super predmet :)";
 
+//
 console.log(__dirname);
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
@@ -21,10 +23,47 @@ app.use(fileUpload());
 
 app.use(cors());
 app.use(express.json());
+let server = require('http').createServer(app);
+const io = require('socket.io')(server);
 
-app.listen(8000, ()=>{                          //spustenie servera               
-    console.log('Server running at port 8000');
+//
+/*
+console.log(__dirname);
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.json());
+app.use(fileUpload());
+
+app.use(cors());
+app.use(express.json());
+*/
+//
+io.on("connection",socket => {
+
+	console.log("user connected");
+	socket.on("chat message", (msg, post_id, name) => {
+		
+		//console.log(post_id+": "+name+": "+msg  );
+		add_date = Date();
+		//console.log(add_date)
+		let query = "INSERT INTO comments_socket (add_date, comment, like_status, parrent_id, posts_id, author_name) VALUES (?,?,?,?,?,?)"
+		const result = conn.query(query, [add_date, msg, 0, 0, post_id, name ]);
+
+		io.emit("chat message", msg);
+		
+	});
+
+	socket.on("display comments", post_id=>{
+
+		let query = "SELECT author_name, comment, add_date FROM comments_socket WHERE comments_socket.posts_id = ?";
+		const result = conn.query(query, [post_id]).then(result => io.emit("display comments", result));
+	})
+
 });
+
+server.listen(8000, ()=>{				//spustenie servera     
+	console.log('Server running at port 8000');
+});
+
 
 async function withTransaction(callback) {
 	try{
@@ -64,7 +103,7 @@ function hash(string){
 	return crypto.createHash('sha256').update(string).digest('hex');
 }
 
-
+/*
 app.get('/', async(req,res) => {
     try{
         res.writeHead(200, { 'Content-Type': 'application/json' });        
@@ -74,6 +113,7 @@ app.get('/', async(req,res) => {
 		return res.status(500).send("An error occured");
     }
 });
+*/
 
 //mam
 app.get('/offers',  async(req,res) => {      //zobrazenie vsetkych ponuk nehnutelnosti
@@ -81,6 +121,7 @@ app.get('/offers',  async(req,res) => {      //zobrazenie vsetkych ponuk nehnute
 	try {
 		let query = "SELECT * FROM posts INNER JOIN users ON posts.users_id = users.id ORDER BY posts.like_status DESC"
 		const result = await conn.query(query);
+		//console.log(result)
 		return res.status(200).json(result);
 		//res.send(result).status(200)
 	} catch (err) {
@@ -121,7 +162,7 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 	const { name, surname, email, telephone, password } = req.body;
 	const auth = hash(password + salt);
 	let profile_picture = 0;
-
+/*
     if(req.files && Object.keys(req.files).length !== 0 && allowedExtensions.exec(req.files.profile_picture.name)){
 		try {
 			profile_picture = req.files.profile_picture;
@@ -136,10 +177,10 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 		profile_picture.name = 'UnknownProfile.jpg';
 		profile_picture.mv(__dirname + 'FrontEnd/assets/upload' + profile.picture.name);
 	}
-    
+    */
 	try {
         let query = "INSERT INTO users (name, surname, email, telephone, profile_picture_ref, auth) VALUES (?,?,?,?,?,?)"
-		const result = await conn.query(query,[name, surname, email, telephone, profile_picture.mv, auth]);
+		const result = await conn.query(query,[name, surname, email, telephone, profile_picture, auth]);
 		return res.status(200).send("User " + name + " was created");
 
 	} catch (err) {
@@ -149,6 +190,7 @@ app.post('/register', async(req,res) => {       //zaregistrovanie pouzivatela
 });
 
 app.put('/login', async(req,res) => {       //prihlasenie pouzivatela do aplikacie
+	console.log("som tu")
 	const { email, password } = req.body;
 	try{
 		if(!email && !password)
@@ -179,11 +221,13 @@ app.put('/changePost', async(req, res) => {
 		return res.status(400).send("Invalid token")
 
 	const user_id = req.user_id;	
+	console.log(user_id)
 	const {post_id, title, text} = req.body;
+	console.log(post_id,title,text)
     
     try {
-		let user_query = "SELECT users_id FROM posts WHERE id = ?";
-		let update_query = "UPDATE posts SET title = ?, text = ? WHERE id = ? ";
+		let user_query = "SELECT users_id FROM posts WHERE post_id = ?";
+		let update_query = "UPDATE posts SET title = ?, text = ? WHERE post_id = ? ";
 
 		const user_result = await conn.query(user_query, [post_id]);
 
@@ -313,8 +357,10 @@ app.post('/postLike', async(req,res) => {       //pridanie liku na post
 	const property_id = req.body.property_id;
 
 	try {
-		let query = "UPDATE posts SET like_status = like_status + 1 WHERE users_id = ? AND property_id = ?";
-		const result = await conn.query(query, [user_id,property_id]);
+		
+		let query = "UPDATE posts SET like_status = like_status + 1 WHERE  property_id = ?";
+		const result = await conn.query(query, [property_id]);
+		
 		return res.status(200).send("Like added!");
 	} catch (err) {
 		console.log(err);
@@ -390,7 +436,7 @@ app.put('/getData', async(req,res) => {
 async function check(req, res, post_id){
 	try {
 		let query = "SELECT * FROM posts INNER JOIN users ON users.id = posts.users_id INNER JOIN property ON property.id = posts.property_id " +
-					"INNER JOIN location ON location.id = property.location_id WHERE posts.id = ?";
+					"INNER JOIN location ON location.id = property.location_id WHERE posts.post_id = ?";
 		const result = await conn.query(query, [post_id]);
 		
 		return res.status(200).json("Post created");
@@ -404,7 +450,7 @@ async function check(req, res, post_id){
 app.post('/newPost', async(req,res) => {
 	if(!authenticateToken(req, res))
 		return res.status(400).send("Invalid token")
-	
+	//console.log(req)
 	console.log(req.body.data)
 	const data = JSON.parse(req.body.data)
 
@@ -416,8 +462,11 @@ app.post('/newPost', async(req,res) => {
 	let image = 0, location_id, property_id, image_path;
 	let like_status = 0, comments_status = 0, add_date = new Date().toISOString().slice(0,19).replace('T',' ');
 
+	
 	if(req.files && Object.keys(req.files).length !== 0 && allowedExtensions.exec(req.files.file.name)){
 		try {
+			console.log("vidim aobrazok")
+
 			image = req.files.file;
 			image.name = crypto.randomBytes(20).toString('hex') + '.jpg'
 			//image.mv(__dirname + '/upload/' + image.name);

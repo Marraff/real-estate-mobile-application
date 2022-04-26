@@ -7,6 +7,7 @@ import { render } from "express/lib/response";
 import Logo from "../../../assets/images/logo.png";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
+import IpAddress from "../../components/IpAddress";
 
 export default class Home extends React.Component{
 
@@ -20,7 +21,7 @@ export default class Home extends React.Component{
     }
     
     componentDidMount(){  
-        return fetch('http://10.0.2.2:8000/offers')
+        return fetch(`http://${IpAddress}:8000/offers/`)
                .then((response) => response.json())
                .then((resposneJson) => {
                    this.setState({
@@ -34,7 +35,7 @@ export default class Home extends React.Component{
     }
 	
 	componentDidUpdate(){
-        return fetch('http://10.0.2.2:8000/offers')
+        return fetch(`http://${IpAddress}:8000/offers/`)
                .then((response) => response.json())
                .then((resposneJson) => {
                    this.setState({
@@ -52,7 +53,7 @@ export default class Home extends React.Component{
 		if(token == null)
 			navigator.replace("Login");
 
-       	fetch('http://10.0.2.2:8000/postLike',{
+       	fetch(`http://${IpAddress}:8000/postLike`,{
        	    method: 'POST',
        		headers:{
        	        'Content-Type':'application/json',
@@ -103,9 +104,12 @@ export default class Home extends React.Component{
 			return seconds.toString() + (seconds == 1 ? " second ago" : " seconds ago")
 	}
 
-    render(){
+    showComments = (post_id, name) => {
+        //console.log(post_id, name)
+        this.props.navigation.navigate('Comments',{"post_id":post_id,"name":name});
+    }
 
-       
+    render(){
 
         if(this.state.isLoading){
            return (<View style={styles.root}><ActivityIndicator/></View>)
@@ -125,13 +129,14 @@ export default class Home extends React.Component{
                     	 </View>
 						 <Pressable onPress = {() => this.schowDetail(val.property_id)} style={{alignItems: 'center', justifyContent: 'center'}}>
                     	    <Image 
-                    	        source={require('../../../assets/upload/6c8f07fb1bcb8b6d80507564a4de74710b4d9e3c.jpg')} 
+                    	        source={Logo} 
                     	        style={[styles.logo]} 
                     	        resizeMode="contain" 
                     	    />
 						 </Pressable>
 						<View style={{alignItems: 'center', justifyContent: 'center'}}>
                     	    <CustomButton text= {val.like_status + " Likes"} onPress={()=>{this.giveLike(val.property_id)}}></CustomButton>
+                            <CustomButton text= {"Comments"} onPress={()=>{this.showComments(val.post_id, val.name)}}></CustomButton>
                    		</View>
                    	</View>
 				)

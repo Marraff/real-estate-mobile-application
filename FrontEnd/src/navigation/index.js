@@ -16,6 +16,7 @@ import Profile from "../screens/Profile/Profile";
 import AddProperty from "../screens/AddProperty/AddProperty";
 import EditPost from "../screens/EditPost/EditPost";
 import EditProperty from "../screens/EditProperty";
+import Comments from "../screens/Comments/Comments";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const TopTab = createMaterialTopTabNavigator();
@@ -70,6 +71,7 @@ function MainStack() {
         <Stack.Navigator screenOptions={{headerShown: false}}>
         	<Stack.Screen name="Dashboard" component={Dashboard}/>
             <Stack.Screen name="DetailScreen" component={DetailScreen}/>
+			<Stack.Screen name="Comments" component={Comments}/>
             <Stack.Screen name="EditPost" component={EditPost}/>
             <Stack.Screen name="EditProperty" component={EditProperty}/>
 		</Stack.Navigator>

@@ -4,6 +4,7 @@ import {View, Text, Image, StyleSheet, useWindowDimensions, ScrollView} from "re
 import Logo from "../../../assets/images/logo.png";
 import CustomInput from "../../components/customInput";
 import CustomButton from "../../components/CustomButton";
+import IpAddress from "../../components/IpAddress";
 
 const RegisterScreen = ({navigation}) => {
     const [name, setName] = useState('');
@@ -15,7 +16,7 @@ const RegisterScreen = ({navigation}) => {
     
     const onSignUpPressed = () => {
         if (name.length>0 && surname.length>0 && email.length>0 && telephone.length>0 && password.length>0 && confirmPassword.length>0 && password==confirmPassword ){
-            fetch('http://10.0.2.2:8000/register',{
+            fetch(`http://${IpAddress}:8000/register/`,{
                 method: 'POST',
                 headers:{
                     'Content-Type':'application/json'

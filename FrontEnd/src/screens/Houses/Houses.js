@@ -7,6 +7,7 @@ import { render } from "express/lib/response";
 import Logo from "../../../assets/images/logo.png";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
+import IpAddress from "../../components/IpAddress";
 
 export default class Flats extends React.Component{
 
@@ -20,7 +21,7 @@ export default class Flats extends React.Component{
     }
     
     componentDidMount(){  
-        return fetch('http://10.0.2.2:8000/getByType',{
+        return fetch(`http://${IpAddress}:8000/getByType`,{
             method: 'PUT',
             headers:{
                 'Content-Type':'application/json'
@@ -40,7 +41,7 @@ export default class Flats extends React.Component{
     }
 
     giveLike = (user_id,property_id) => {
-        fetch('http://10.0.2.2:8000/postLike',{
+        fetch(`http://${IpAddress}:8000/postLike`,{
             method: 'POST',
             headers:{
                 'Content-Type':'application/json'
@@ -60,7 +61,7 @@ export default class Flats extends React.Component{
       		if(token == null)
             	navigator.replace("Login");
  
-         fetch('http://10.0.2.2:8000/postLike',{
+         fetch(`http://${IpAddress}:8000/postLike`,{
          	method: 'POST',
             headers:{
                 'Content-Type':'application/json',

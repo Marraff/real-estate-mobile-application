@@ -6,6 +6,7 @@ import Logo from "../../../assets/images/logo.png";
 import CustomInput from "../../components/customInput";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
+import IpAddress from "../../components/IpAddress";
 
 
 const EditPost = ({route}) => {
@@ -17,7 +18,7 @@ const EditPost = ({route}) => {
     const changePost = async () => {
         if (title.length>0 && text.length>0){
 			const token = await AsyncStorage.getItem('LOGIN_TOKEN');
-            fetch('http://10.0.2.2:8000/changePost',{
+            fetch(`http://${IpAddress}:8000/changePost`,{
                 method: 'PUT',
                 headers:{
                     'Content-Type':'application/json',
