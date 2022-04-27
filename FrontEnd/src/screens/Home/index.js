@@ -17,10 +17,12 @@ export default class Home extends React.Component{
 			current : 0,
             isLoading: true,
             dataSource: null,
+           
         }
     }
     
     componentDidMount(){  
+        //this.isMounted = false
         return fetch(`http://${IpAddress}:8000/offers/`)
                .then((response) => response.json())
                .then((resposneJson) => {
@@ -104,8 +106,8 @@ export default class Home extends React.Component{
 			return seconds.toString() + (seconds == 1 ? " second ago" : " seconds ago")
 	}
 
-    showComments = (post_id, name) => {
-        //console.log(post_id, name)
+    showComments = async(post_id, name) => {
+        
         this.props.navigation.navigate('Comments',{"post_id":post_id,"name":name});
     }
 
@@ -119,17 +121,14 @@ export default class Home extends React.Component{
                 return (
 					<View key={key} style={styles.root} >
 						<View >
-                    		<Image 
-                    	        source={val.profile_picture_ref} 
-                    	        style={[styles.profile]} 
-                    	        resizeMode="contain" 
-                    	    />
+                    		
                     	    <Text>{"Posted by " + val.name}{" "}{val.surname}{" "}{this.formatTime(val.add_date)}</Text>
                     	    <Text style={styles.post_title}>{val.title}</Text>
                     	 </View>
 						 <Pressable onPress = {() => this.schowDetail(val.property_id)} style={{alignItems: 'center', justifyContent: 'center'}}>
                     	    <Image 
                     	        source={Logo} 
+                                //source={ {uri: '../../../assets/images/logo.png'}} 
                     	        style={[styles.logo]} 
                     	        resizeMode="contain" 
                     	    />

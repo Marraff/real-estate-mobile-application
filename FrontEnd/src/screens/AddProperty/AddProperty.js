@@ -71,7 +71,7 @@ const AddProperty = ({navigation}) => {
             includeBase64: false,
         },
     }
-    const formData = new FormData([form])
+    var formData = new FormData([form])
     const chooseFile = async () => {
         const images = await launchImageLibrary(options);
         console.log(images.assets[0]);
@@ -149,6 +149,8 @@ const AddProperty = ({navigation}) => {
                 console.log(error);
             })
         }
+        formData[0].delete("data")
+        formData[0].delete("file")
     }
 
     return(

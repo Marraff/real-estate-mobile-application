@@ -42,9 +42,7 @@ io.on("connection",socket => {
 	console.log("user connected");
 	socket.on("chat message", (msg, post_id, name) => {
 		
-		//console.log(post_id+": "+name+": "+msg  );
 		add_date = Date();
-		//console.log(add_date)
 		let query = "INSERT INTO comments_socket (add_date, comment, like_status, parrent_id, posts_id, author_name) VALUES (?,?,?,?,?,?)"
 		const result = conn.query(query, [add_date, msg, 0, 0, post_id, name ]);
 
@@ -460,7 +458,9 @@ app.post('/newPost', async(req,res) => {
 	const { title, text } = data;
 	
 	let image = 0, location_id, property_id, image_path;
-	let like_status = 0, comments_status = 0, add_date = new Date().toISOString().slice(0,19).replace('T',' ');
+	let like_status = 0, comments_status = 0;
+	let add_date = Date();//.toISOString().slice(0,19).replace('T',' ');
+	console.log(add_date)
 
 	
 	if(req.files && Object.keys(req.files).length !== 0 && allowedExtensions.exec(req.files.file.name)){

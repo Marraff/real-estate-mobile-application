@@ -9,7 +9,7 @@ import IpAddress from "../../components/IpAddress";
 
 
 const SignInScreen = ({navigation}) => {
-/*
+
     const checkAuth = async () => {
 		const token = await AsyncStorage.getItem('LOGIN_TOKEN');
 		if(token !== null){
@@ -28,7 +28,7 @@ const SignInScreen = ({navigation}) => {
 		}
 	}
 	checkAuth()
-*/
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const {height} = useWindowDimensions();

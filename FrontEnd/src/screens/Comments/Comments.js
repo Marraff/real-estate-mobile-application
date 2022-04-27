@@ -53,10 +53,36 @@ export default class Comments extends React.Component{
         this.socket.emit("display comments", this.state.post_id);
     }
 
+    formatTime = (dur2) => {
+		let diff = Math.abs(new Date().getTime() - new Date(dur2).getTime()) / 1000;
+		let hours = Math.floor(diff / 3600)
+		let minutes = Math.floor((diff % 3600) / 60)
+		let seconds = Math.floor(diff % 60)
+		if(hours >= 24 * 365){
+			let years = Math.floor(hours / (365 * 24))
+			return years.toString() + (years == 1 ? " year ago" : " years ago")
+		}
+		if(hours >= 24 * 30){
+			let months = Math.floor(hours/ (30 * 24))
+			return months.toString() + (months == 1 ? " month ago" : " months ago")
+		}
+		if(hours >= 24){
+			let days = Math.floor(hours / 24)
+			return days.toString() + (days == 1 ? " day ago" : " days ago")
+		}
+
+		if(hours < 24)
+			return hours.toString() + (hours == 1 ? " hour ago" : " hours ago")
+		if(minutes < 60)
+			return minutes.toString() + (minutes == 1 ? " minute ago" : " minutes ago")
+		if(seconds < 60)
+			return seconds.toString() + (seconds == 1 ? " second ago" : " seconds ago")
+	}
+
     render(){
         
         const chatMessages = this.state.chatMessages.map(chatMessage => {
-        return <Text key={chatMessage.comment} style={{ fontSize: 25, color: 'white' }}>{chatMessage.author_name}{":  "}{chatMessage.comment}</Text>
+        return <Text key={chatMessage.comment} style={{ fontSize: 25, color: 'white' }}>{this.formatTime(chatMessage.add_date)}{":  "}{chatMessage.comment}</Text>
         });
     
         return(
