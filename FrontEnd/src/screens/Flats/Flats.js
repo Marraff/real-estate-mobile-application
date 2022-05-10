@@ -34,7 +34,12 @@ export default class Flats extends React.Component{
             });
             
          });
-        /*
+        
+
+    }
+
+     componentDidUpdate(){
+
         return fetch(`http://${IpAddress}:8000/getByType`,{
             method: 'PUT',
             headers:{
@@ -52,31 +57,6 @@ export default class Flats extends React.Component{
                 .catch((error)=>{
                     console.log(error);
                 });
-        */
-    }
-/*
-    giveLike = (user_id,property_id) => {
-        fetch(`http://${IpAddress}:8000/postLike`,{
-            method: 'POST',
-            headers:{
-                'Content-Type':'application/json'
-                },
-                body: JSON.stringify({"user_id": user_id, "property_id": property_id})
-        })
-                .then((res) => {
-                    console.log(res.status)
-                })
-                .catch((error)=>{
-                    console.log(error);
-                });
-                
-     }
-     */
-     componentDidUpdate(){
-
-        this.socket = io(`http://${IpAddress}:8000`);
-
-        this.socket.emit("display by type byt", "byt");
 
     }
 

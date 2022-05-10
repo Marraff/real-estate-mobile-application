@@ -24,8 +24,7 @@ export default class Home extends React.Component{
     }
     
     componentDidMount(){  
-        //this.isMounted = false
-
+        
         this.socket = io(`http://${IpAddress}:8000`);
 
         this.socket.emit("display all posts");
@@ -39,28 +38,11 @@ export default class Home extends React.Component{
             
  
          });
-        /*
-        return fetch(`http://${IpAddress}:8000/offers/`)
-               .then((response) => response.json())
-               .then((resposneJson) => {
-                   this.setState({
-                       isLoading: false,
-                       dataSource: resposneJson,
-                   })
-               })
-               .catch((error)=>{
-                   console.log(error);
-               });
-        */
+      
     }
 	
 	componentDidUpdate(){
-
-        this.socket = io(`http://${IpAddress}:8000`);
-
-        this.socket.emit("display all posts");
-
-        /*
+       
         return fetch(`http://${IpAddress}:8000/offers/`)
                .then((response) => response.json())
                .then((resposneJson) => {
@@ -72,7 +54,7 @@ export default class Home extends React.Component{
                .catch((error)=>{
                    console.log(error);
                });
-        */
+        
     }
 
     giveLike = async (property_id) => {

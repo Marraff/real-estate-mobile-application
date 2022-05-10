@@ -1,5 +1,5 @@
 
-const IpAddress = '10.10.28.79'
+const IpAddress = '192.168.121.250'
 export default IpAddress
 
 //skolska ip: 147.175.163.57
