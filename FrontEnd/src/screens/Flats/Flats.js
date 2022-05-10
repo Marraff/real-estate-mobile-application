@@ -8,6 +8,7 @@ import Logo from "../../../assets/images/logo.png";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 import IpAddress from "../../components/IpAddress";
+import io from "socket.io-client";
 
 export default class Flats extends React.Component{
 
@@ -21,6 +22,19 @@ export default class Flats extends React.Component{
     }
     
     componentDidMount(){  
+        this.socket = io(`http://${IpAddress}:8000`);
+
+        this.socket.emit("display by type byt", "byt");
+
+        this.socket.on("display by type byt",(result)=>{
+            const copy = result;
+            this.setState({
+                isLoading: false,
+                dataSource: copy,
+            });
+            
+         });
+        /*
         return fetch(`http://${IpAddress}:8000/getByType`,{
             method: 'PUT',
             headers:{
@@ -38,8 +52,9 @@ export default class Flats extends React.Component{
                 .catch((error)=>{
                     console.log(error);
                 });
+        */
     }
-
+/*
     giveLike = (user_id,property_id) => {
         fetch(`http://${IpAddress}:8000/postLike`,{
             method: 'POST',
@@ -56,6 +71,15 @@ export default class Flats extends React.Component{
                 });
                 
      }
+     */
+     componentDidUpdate(){
+
+        this.socket = io(`http://${IpAddress}:8000`);
+
+        this.socket.emit("display by type byt", "byt");
+
+    }
+
 	giveLike = async (property_id) => {
     	const token = await AsyncStorage.getItem('LOGIN_TOKEN');
       		if(token == null)

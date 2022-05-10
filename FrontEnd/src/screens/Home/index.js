@@ -8,6 +8,7 @@ import Logo from "../../../assets/images/logo.png";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 import IpAddress from "../../components/IpAddress";
+import io from "socket.io-client";
 
 export default class Home extends React.Component{
 
@@ -17,12 +18,28 @@ export default class Home extends React.Component{
 			current : 0,
             isLoading: true,
             dataSource: null,
+            allPosts: [],
            
         }
     }
     
     componentDidMount(){  
         //this.isMounted = false
+
+        this.socket = io(`http://${IpAddress}:8000`);
+
+        this.socket.emit("display all posts");
+
+        this.socket.on("display all posts",(result)=>{
+            const copy = result;
+            this.setState({
+                isLoading: false,
+                dataSource: copy,
+            });
+            
+ 
+         });
+        /*
         return fetch(`http://${IpAddress}:8000/offers/`)
                .then((response) => response.json())
                .then((resposneJson) => {
@@ -34,9 +51,16 @@ export default class Home extends React.Component{
                .catch((error)=>{
                    console.log(error);
                });
+        */
     }
 	
 	componentDidUpdate(){
+
+        this.socket = io(`http://${IpAddress}:8000`);
+
+        this.socket.emit("display all posts");
+
+        /*
         return fetch(`http://${IpAddress}:8000/offers/`)
                .then((response) => response.json())
                .then((resposneJson) => {
@@ -48,6 +72,7 @@ export default class Home extends React.Component{
                .catch((error)=>{
                    console.log(error);
                });
+        */
     }
 
     giveLike = async (property_id) => {

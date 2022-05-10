@@ -21,6 +21,11 @@ export default class Profile extends React.Component{
     }
     
     componentDidMount(){  
+
+        //this.socket = io(`http://${IpAddress}:8000`);
+
+        //this.socket.emit("display my properties", this.state.post_id);
+        
 		const mount = async() => {
 			const token = await AsyncStorage.getItem('LOGIN_TOKEN');
        		return fetch(`http://${IpAddress}:8000/myOffers`,{
@@ -42,6 +47,7 @@ export default class Profile extends React.Component{
        		 	 });
 		}
 		mount()
+        
     }
 		
     componentDidUpdate(){  

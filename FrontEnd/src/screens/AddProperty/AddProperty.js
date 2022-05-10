@@ -72,6 +72,7 @@ const AddProperty = ({navigation}) => {
         },
     }
     var formData = new FormData([form])
+    
     const chooseFile = async () => {
         const images = await launchImageLibrary(options);
         console.log(images.assets[0]);

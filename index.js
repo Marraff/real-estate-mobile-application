@@ -39,7 +39,10 @@ app.use(express.json());
 //
 io.on("connection",socket => {
 
-	console.log("user connected");
+	
+
+	// comment section
+
 	socket.on("chat message", (msg, post_id, name) => {
 		
 		add_date = Date();
@@ -55,6 +58,45 @@ io.on("connection",socket => {
 		let query = "SELECT author_name, comment, add_date FROM comments_socket WHERE comments_socket.posts_id = ?";
 		const result = conn.query(query, [post_id]).then(result => io.emit("display comments", result));
 	})
+
+	// user posts section
+
+	socket.on("display my properties", user_id =>{
+
+		let query = "SELECT * FROM property INNER JOIN location ON property.location_id = location.id INNER JOIN posts " +
+					"ON posts.property_id = property.id WHERE posts.users_id = ?"
+		const result = conn.query(query, [user_id]).then(result => io.emit("display my properties", result));
+		
+	} )
+
+	// get by types section
+
+	socket.on("display by type dom", type =>{
+	
+			let query = "SELECT * FROM posts INNER JOIN property ON property.id = posts.property_id INNER JOIN users ON users.id = posts.users_id " +
+						"INNER JOIN location ON location.id = property.location_id WHERE property.type = ?";
+			const result = conn.query(query, [type]).then(result => io.emit("display by type dom", result));;
+
+	})
+
+	socket.on("display by type byt", type =>{
+	
+		let query = "SELECT * FROM posts INNER JOIN property ON property.id = posts.property_id INNER JOIN users ON users.id = posts.users_id " +
+					"INNER JOIN location ON location.id = property.location_id WHERE property.type = ?";
+		const result = conn.query(query, [type]).then(result => io.emit("display by type byt", result));;
+
+})
+
+	// all posts
+
+	socket.on("display all posts", () =>{
+
+		let query = "SELECT * FROM posts INNER JOIN users ON posts.users_id = users.id ORDER BY posts.like_status DESC"
+		const result = conn.query(query).then(result => io.emit("display all posts", result));
+		
+	} )
+
+
 
 });
 
