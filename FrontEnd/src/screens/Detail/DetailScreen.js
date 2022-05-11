@@ -7,6 +7,7 @@ import Logo from "../../../assets/images/logo.png";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 import IpAddress from "../../components/IpAddress";
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default class DetailScreen extends React.Component{
 
@@ -33,11 +34,26 @@ export default class DetailScreen extends React.Component{
                         isLoading: false,
                         dataSource: resposneJson,
                     })
+                    AsyncStorage.setItem((this.state.property_id).toString(), JSON.stringify(resposneJson))
+                    
                 })
                 .catch((error)=>{
                     console.log(error);
                 });
     }
+    loadData = () => {
+        
+        AsyncStorage.getItem((this.state.property_id).toString())
+            .then(data => {
+                this.setState({
+                    isLoading: false,
+                    dataSource: JSON.parse(data),
+                })
+            })
+            .catch(error => console.log(error));
+        
+    }
+
     render(){
 
         const onSignPress = () => {
@@ -46,15 +62,18 @@ export default class DetailScreen extends React.Component{
         
 
         if(this.state.isLoading){
+            this.loadData()
             return (
                 <View style={styles.root}>
+
+                    <Text>{"offline"}</Text>
                     <ActivityIndicator/>
                 </View>
             )
         } 
 
         else {
-        
+            
             let offer = this.state.dataSource.map((val,key)=> {
                 
                 return (

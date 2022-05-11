@@ -8,6 +8,7 @@ import Logo from "../../../assets/images/logo.png";
 import CustomButton from "../../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 import IpAddress from "../../components/IpAddress";
+import io from "socket.io-client";
 
 export default class Profile extends React.Component{
 
@@ -22,10 +23,23 @@ export default class Profile extends React.Component{
     
     componentDidMount(){  
 
-        //this.socket = io(`http://${IpAddress}:8000`);
+        this.socket = io(`http://${IpAddress}:8000`);
 
-        //this.socket.emit("display my properties", this.state.post_id);
-        
+        this.socket.emit("display my properties", this.state.post_id);
+
+        this.socket.on("display my properties",(result)=>{
+            const copy = result;
+            this.setState({
+                isLoading: false,
+                dataSource: copy,
+            });
+            
+         });
+
+
+
+         
+        /*
 		const mount = async() => {
 			const token = await AsyncStorage.getItem('LOGIN_TOKEN');
        		return fetch(`http://${IpAddress}:8000/myOffers`,{
@@ -47,6 +61,7 @@ export default class Profile extends React.Component{
        		 	 });
 		}
 		mount()
+        */
         
     }
 		
